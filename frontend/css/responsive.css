@@ -1,0 +1,324 @@
+/* Responsive Design */
+
+/* Tablet (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .app {
+    grid-template-columns: 72px 200px 1fr;
+  }
+  
+  .members-sidebar {
+    display: none;
+  }
+  
+  .members-sidebar.active {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 240px;
+    z-index: 100;
+    animation: slideInLeft 0.3s ease;
+  }
+  
+  .emoji-picker {
+    right: 20px;
+  }
+}
+
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 60px;
+  }
+  
+  .servers-sidebar {
+    display: none;
+  }
+  
+  .servers-sidebar.mobile-active {
+    display: flex;
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: calc(100vh - 60px);
+    width: 72px;
+    z-index: 100;
+    animation: slideInRight 0.3s ease;
+  }
+  
+  .channels-sidebar {
+    display: none;
+  }
+  
+  .channels-sidebar.mobile-active {
+    display: flex;
+    position: fixed;
+    right: 72px;
+    top: 0;
+    height: calc(100vh - 60px);
+    width: 240px;
+    z-index: 99;
+    animation: slideInRight 0.3s ease;
+  }
+  
+  .members-sidebar {
+    display: none;
+  }
+  
+  .members-sidebar.mobile-active {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: calc(100vh - 60px);
+    width: 240px;
+    z-index: 98;
+    animation: slideInLeft 0.3s ease;
+  }
+  
+  /* Mobile Bottom Navigation */
+  .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    padding: 8px;
+    gap: 4px;
+  }
+  
+  .mobile-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-family: 'Cairo', sans-serif;
+    font-size: 11px;
+  }
+  
+  .mobile-nav-btn i {
+    font-size: 20px;
+  }
+  
+  .mobile-nav-btn.active {
+    background: var(--bg-active);
+    color: var(--brand-primary);
+  }
+  
+  .mobile-nav-btn:active {
+    transform: scale(0.95);
+  }
+  
+  /* Adjust chat area for mobile */
+  .chat-area {
+    height: calc(100vh - 60px);
+  }
+  
+  .chat-header {
+    padding: 0 12px;
+  }
+  
+  .chat-messages {
+    padding: 12px;
+  }
+  
+  .message {
+    padding: 4px 8px;
+  }
+  
+  .message-input-container {
+    padding: 12px;
+  }
+  
+  .message-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  /* Modal adjustments */
+  .modal-content {
+    width: 95%;
+    padding: 30px 20px;
+  }
+  
+  .auth-form h2 {
+    font-size: 24px;
+  }
+  
+  /* Emoji picker on mobile */
+  .emoji-picker {
+    bottom: 80px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+  
+  .emoji-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+  
+  /* Upload modal on mobile */
+  .upload-modal {
+    max-width: 95%;
+    padding: 20px;
+  }
+  
+  .upload-area {
+    padding: 40px 20px;
+  }
+  
+  /* Toast notifications on mobile */
+  .toast-container {
+    left: 10px;
+    right: 10px;
+    bottom: 80px;
+  }
+  
+  .toast {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  /* Context menu on mobile */
+  .context-menu {
+    min-width: 160px;
+  }
+  
+  /* Hide desktop-only elements */
+  .server-header .dropdown-toggle {
+    display: none;
+  }
+}
+
+/* Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 20px 15px;
+  }
+  
+  .auth-tabs {
+    flex-direction: column;
+  }
+  
+  .auth-tab {
+    width: 100%;
+  }
+  
+  .chat-header h2 {
+    font-size: 14px;
+  }
+  
+  .message-author {
+    font-size: 14px;
+  }
+  
+  .message-text {
+    font-size: 14px;
+  }
+  
+  .emoji-grid {
+    grid-template-columns: repeat(6, 1fr);
+    font-size: 20px;
+  }
+  
+  .welcome-message {
+    padding: 20px;
+  }
+  
+  .welcome-message i {
+    font-size: 36px;
+  }
+  
+  .welcome-message h3 {
+    font-size: 20px;
+  }
+}
+
+/* Landscape mode on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .chat-header {
+    height: 44px;
+  }
+  
+  .message-input-container {
+    padding: 8px 12px;
+  }
+  
+  .mobile-nav {
+    padding: 4px;
+  }
+  
+  .mobile-nav-btn {
+    padding: 6px;
+  }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .user-avatar,
+  .member-avatar,
+  .message-avatar {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* Dark mode support (already dark by default) */
+@media (prefers-color-scheme: light) {
+  /* Keep dark theme even if system prefers light */
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .servers-sidebar,
+  .channels-sidebar,
+  .members-sidebar,
+  .chat-header,
+  .message-input-container,
+  .mobile-nav {
+    display: none;
+  }
+  
+  .chat-messages {
+    overflow: visible;
+  }
+  
+  .message {
+    page-break-inside: avoid;
+  }
+}
+
+/* Desktop adjustments for very large screens */
+@media (min-width: 1920px) {
+  .app {
+    grid-template-columns: 80px 280px 1fr 280px;
+  }
+  
+  .server-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+  
+  .modal-content {
+    max-width: 560px;
+  }
+}
