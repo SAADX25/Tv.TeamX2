@@ -80,6 +80,21 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   }
 });
 
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Serve index.html for the root route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// Handle SPA routing - return index.html for all non-API routes
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+  }
+});
+
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/teamx2-chat')
   .then(() => console.log('✅ متصل بقاعدة البيانات MongoDB'))
