@@ -6,7 +6,6 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
 import fastifyJwt from "@fastify/jwt";
 import { Server } from "socket.io";
-import http from "http";
 import { nanoid } from "nanoid";
 import { validateSigToken } from "./sigAuth.js";
 
@@ -37,8 +36,9 @@ fastify.get("/rooms/new", async (_req, reply) => {
   reply.send({ roomId, sigToken });
 });
 
-const server = http.createServer(fastify);
-const io = new Server(server, { cors: { origin: ORIGIN, credentials: true } });
+// Wait for Fastify to be ready before creating Socket.IO server
+await fastify.ready();
+const io = new Server(fastify.server, { cors: { origin: ORIGIN, credentials: true } });
 
 io.use((socket, next) => {
   try {
@@ -62,7 +62,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => socket.to(roomId).emit("system", { type: "leave", user }));
 });
 
-server.listen({ port: PORT, host: "0.0.0.0" }, (err, address) => {
+fastify.listen({ port: PORT, host: "0.0.0.0" }, (err, address) => {
   if (err) {
     fastify.log.error(err);
     process.exit(1);
