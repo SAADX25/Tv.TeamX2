@@ -1,5 +1,5 @@
 // Configuration
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://laughing-palm-tree-5w7pvxqjx59fppr-3000.app.github.dev/';
 
 // Utility Functions
 const utils = {

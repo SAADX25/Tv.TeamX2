@@ -10,7 +10,7 @@ const socketModule = {
     }
 
     // Connect to socket server
-    this.socket = io('http://localhost:3000', {
+    this.socket = io('https://laughing-palm-tree-5w7pvxqjx59fppr-3000.app.github.dev/', {
       auth: {
         token: auth.token
       }
