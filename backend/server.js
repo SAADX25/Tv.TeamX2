@@ -55,9 +55,6 @@ const upload = multer({
   }
 });
 
-// Serve frontend static files
-app.use(express.static(path.join(__dirname, '../frontend')));
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messagesRoutes);
@@ -82,6 +79,9 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     res.status(500).json({ error: 'خطأ في رفع الملف' });
   }
 });
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Serve index.html for the root route
 app.get('/', (req, res) => {
