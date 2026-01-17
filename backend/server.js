@@ -12,7 +12,7 @@ import { validateSigToken } from "./sigAuth.js";
 const {
   PORT = 4000,
   JWT_SECRET = "change_me",
-  ORIGIN = "http://localhost:5173",
+  ORIGIN = "https://effective-giggle-xjgqrvw794gcp7gv-5173.app.github.dev/",
 } = process.env;
 
 const fastify = Fastify({ logger: true });
