@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeamX2 Chat - محادثة TeamX2</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <!-- Auth Modal -->
+  <div id="authModal" class="modal active">
+    <div class="modal-content">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">
+          <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+        </button>
+        <button class="auth-tab" data-tab="register">
+          <i class="fas fa-user-plus"></i> إنشاء حساب
+        </button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginForm" class="auth-form active">
+        <h2>مرحباً بعودتك!</h2>
+        <p>يسعدنا رؤيتك مجدداً</p>
+        <form id="loginFormElement">
+          <div class="form-group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="loginEmail" required>
+          </div>
+          <div class="form-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="loginPassword" required>
+          </div>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-sign-in-alt"></i> دخول
+          </button>
+        </form>
+      </div>
+
+      <!-- Register Form -->
+      <div id="registerForm" class="auth-form">
+        <h2>إنشاء حساب جديد</h2>
+        <p>انضم إلى مجتمع TeamX2</p>
+        <form id="registerFormElement">
+          <div class="form-group">
+            <label>اسم المستخدم</label>
+            <input type="text" id="registerUsername" required minlength="3">
+          </div>
+          <div class="form-group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="registerEmail" required>
+          </div>
+          <div class="form-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="registerPassword" required minlength="6">
+          </div>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-user-plus"></i> تسجيل
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="app" style="display: none;">
+    <!-- Servers Sidebar -->
+    <aside class="servers-sidebar">
+      <div class="server-icon home-server">
+        <i class="fas fa-home"></i>
+      </div>
+      <div class="servers-list" id="serversList">
+        <!-- Servers will be loaded here -->
+      </div>
+      <div class="server-icon add-server">
+        <i class="fas fa-plus"></i>
+      </div>
+    </aside>
+
+    <!-- Channels Sidebar -->
+    <aside class="channels-sidebar">
+      <div class="server-header">
+        <h3 id="serverName">TeamX2 Chat</h3>
+        <button class="dropdown-toggle">
+          <i class="fas fa-chevron-down"></i>
+        </button>
+      </div>
+      
+      <div class="channels-list" id="channelsList">
+        <!-- Text Channels -->
+        <div class="channel-category">
+          <div class="category-header">
+            <i class="fas fa-chevron-down"></i>
+            <span>قنوات نصية</span>
+          </div>
+          <div class="category-channels">
+            <div class="channel active" data-channel-id="general" data-type="text">
+              <i class="fas fa-hashtag"></i>
+              <span>عام</span>
+            </div>
+            <div class="channel" data-channel-id="random" data-type="text">
+              <i class="fas fa-hashtag"></i>
+              <span>عشوائي</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Voice Channels -->
+        <div class="channel-category">
+          <div class="category-header">
+            <i class="fas fa-chevron-down"></i>
+            <span>قنوات صوتية</span>
+          </div>
+          <div class="category-channels">
+            <div class="channel" data-channel-id="voice-1" data-type="voice">
+              <i class="fas fa-volume-up"></i>
+              <span>صوتي 1</span>
+            </div>
+            <div class="channel" data-channel-id="voice-2" data-type="voice">
+              <i class="fas fa-volume-up"></i>
+              <span>صوتي 2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Section -->
+      <div class="user-section">
+        <div class="user-info">
+          <img src="assets/default-avatar.svg" alt="Avatar" class="user-avatar" id="userAvatar">
+          <div class="user-details">
+            <span class="username" id="currentUsername">المستخدم</span>
+            <span class="user-status" id="currentStatus">متصل</span>
+          </div>
+        </div>
+        <div class="user-controls">
+          <button class="control-btn" id="muteBtn" title="كتم الصوت">
+            <i class="fas fa-microphone"></i>
+          </button>
+          <button class="control-btn" id="deafenBtn" title="كتم السماعات">
+            <i class="fas fa-headphones"></i>
+          </button>
+          <button class="control-btn" id="settingsBtn" title="الإعدادات">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="chat-area">
+      <header class="chat-header">
+        <div class="channel-info">
+          <i class="fas fa-hashtag channel-icon"></i>
+          <h2 id="currentChannelName">عام</h2>
+        </div>
+        <div class="header-actions">
+          <button class="header-btn" title="بحث">
+            <i class="fas fa-search"></i>
+          </button>
+          <button class="header-btn" id="toggleMembersBtn" title="الأعضاء">
+            <i class="fas fa-users"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="welcome-message">
+          <i class="fas fa-hashtag"></i>
+          <h3>مرحباً بك في #<span id="welcomeChannelName">عام</span></h3>
+          <p>هذه بداية قناة #<span id="welcomeChannelName2">عام</span></p>
+        </div>
+        <!-- Messages will be loaded here -->
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="typing-indicator" id="typingIndicator" style="display: none;">
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <span class="typing-text"></span>
+      </div>
+
+      <!-- Message Input -->
+      <div class="message-input-container">
+        <button class="input-btn" id="attachBtn" title="إرفاق ملف">
+          <i class="fas fa-plus"></i>
+        </button>
+        <div class="message-input-wrapper">
+          <input type="text" id="messageInput" placeholder="أرسل رسالة إلى #عام" autocomplete="off">
+          <div class="input-actions">
+            <button class="input-btn" id="emojiBtn" title="اختر إيموجي">
+              <i class="far fa-smile"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emoji Picker -->
+      <div class="emoji-picker" id="emojiPicker" style="display: none;">
+        <div class="emoji-header">
+          <span>اختر إيموجي</span>
+        </div>
+        <div class="emoji-grid">
+          😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 
+          🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 
+          😋 😛 😝 😜 🤪 🤨 🧐 🤓 😎 🤩 
+          🥳 😏 😒 😞 😔 😟 😕 🙁 ☹️ 😣 
+          😖 😫 😩 🥺 😢 😭 😤 😠 😡 🤬 
+          👍 👎 👊 ✊ 🤛 🤜 🤞 ✌️ 🤟 🤘 
+          👌 🤌 🤏 👈 👉 👆 👇 ☝️ ✋ 🤚 
+          🖐 🖖 👋 🤙 💪 🦾 🙏 ✍️ 💅 🤳 
+          ❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 
+          ❣️ 💕 💞 💓 💗 💖 💘 💝 💟 ☮️
+        </div>
+      </div>
+    </main>
+
+    <!-- Members Sidebar -->
+    <aside class="members-sidebar" id="membersSidebar">
+      <div class="members-header">
+        <h3>الأعضاء</h3>
+      </div>
+      <div class="members-list" id="membersList">
+        <div class="member-group">
+          <div class="member-group-title">متصل — <span>1</span></div>
+          <div class="member" id="currentUserMember">
+            <img src="assets/default-avatar.svg" alt="Avatar" class="member-avatar">
+            <div class="member-info">
+              <span class="member-name">المستخدم</span>
+              <span class="member-status online">متصل</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Upload Modal -->
+  <div id="uploadModal" class="modal">
+    <div class="modal-content upload-modal">
+      <div class="modal-header">
+        <h3>رفع ملف</h3>
+        <button class="close-modal" id="closeUploadModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="upload-area" id="uploadArea">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>اسحب وأفلت الملف هنا</p>
+        <p>أو</p>
+        <button class="btn-primary" id="selectFileBtn">اختر ملف</button>
+        <input type="file" id="fileInput" style="display: none;">
+        <p class="upload-hint">الحد الأقصى: 10 ميجابايت</p>
+      </div>
+      <div class="file-preview" id="filePreview" style="display: none;">
+        <div class="preview-info">
+          <i class="file-icon"></i>
+          <div class="file-details">
+            <span class="file-name"></span>
+            <span class="file-size"></span>
+          </div>
+          <button class="remove-file" id="removeFileBtn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="upload-progress" id="uploadProgress" style="display: none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <span class="progress-text" id="progressText">0%</span>
+        </div>
+        <button class="btn-primary" id="uploadFileBtn">رفع</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context Menu -->
+  <div class="context-menu" id="contextMenu" style="display: none;">
+    <div class="context-item" data-action="reply">
+      <i class="fas fa-reply"></i> رد
+    </div>
+    <div class="context-item" data-action="edit">
+      <i class="fas fa-edit"></i> تعديل
+    </div>
+    <div class="context-item" data-action="copy">
+      <i class="fas fa-copy"></i> نسخ
+    </div>
+    <div class="context-item danger" data-action="delete">
+      <i class="fas fa-trash"></i> حذف
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Socket.IO -->
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  
+  <!-- JavaScript -->
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/socket.js"></script>
+  <script src="js/fileUpload.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
