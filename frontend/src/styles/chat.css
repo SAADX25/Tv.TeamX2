@@ -1,0 +1,82 @@
+:root {
+  --bg: #0f172a;
+  --panel: #1e293b;
+  --text: #e2e8f0;
+  --accent: #38bdf8;
+  --accent-2: #a855f7;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+.login,
+.room {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.chat {
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 16px;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+.controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: #0b1220;
+  color: var(--text);
+}
+button {
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0b1220;
+  font-weight: 700;
+  cursor: pointer;
+}
+.bubble {
+  max-width: 70%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #111827;
+  align-self: flex-start;
+}
+.bubble.me {
+  align-self: flex-end;
+  background: #0ea5e9;
+  color: #0b1220;
+}
+.bubble.system {
+  align-self: center;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 14px;
+}
+.slowmo {
+  animation: slowmo 0.6s ease-out;;
+}
+@keyframes slowmo {
+  0% { transform: translateY(10px) scale(0.97); opacity: 0; }
+  60% { transform: translateY(-2px) scale(1.01); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
