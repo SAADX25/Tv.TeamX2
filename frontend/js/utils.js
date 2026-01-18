@@ -150,6 +150,8 @@ const utils = {
   getAvatarUrl(avatar) {
     if (!avatar || avatar === 'default-avatar.svg') return 'assets/default-avatar.svg';
     if (avatar.startsWith('http') || avatar.startsWith('assets/')) return avatar;
+    // ✅ إذا كان المسار يبدأ بـ /uploads/ أو uploads/ لا تضيفه مرة ثانية
+    if (avatar.startsWith('/uploads/') || avatar.startsWith('uploads/')) return avatar;
     return `/uploads/${avatar}`;
   }
 };
