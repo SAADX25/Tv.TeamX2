@@ -60,6 +60,11 @@ const app = {
             if(auth.user) {
                 document.getElementById('settingsUsername').value = auth.user.username;
                 document.getElementById('settingsAvatar').value = auth.user.avatar || '';
+                
+                // ✅ تحديث صورة المعاينة عند فتح الإعدادات
+                const previewAvatar = document.querySelector('#settingsModal .member-avatar');
+                if (previewAvatar) previewAvatar.src = utils.getAvatarUrl(auth.user.avatar);
+
                 // ✅ تعبئة اللون الحالي في القائمة
                 const colorSelect = document.getElementById('settingsNameColor');
                 if (colorSelect) colorSelect.value = auth.user.nameColor || 'default';
@@ -87,6 +92,11 @@ const app = {
         
         if (uploadAvatarBtn && avatarInput) {
             uploadAvatarBtn.onclick = () => avatarInput.click();
+            avatarUrlInput.onchange = () => {
+                const previewAvatar = document.querySelector('#settingsModal .member-avatar');
+                if (previewAvatar) previewAvatar.src = utils.getAvatarUrl(avatarUrlInput.value);
+            };
+            
             avatarInput.onchange = async () => {
                 if (avatarInput.files.length > 0) {
                     const formData = new FormData();
