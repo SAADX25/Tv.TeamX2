@@ -426,7 +426,6 @@ body {
   padding: 12px 0;
   gap: 8px;
   overflow-y: auto;
-  border-left: 1px solid var(--border-color);
 }
 
 .server-icon {
