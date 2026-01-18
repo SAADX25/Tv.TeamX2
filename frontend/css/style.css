@@ -264,7 +264,7 @@ body {
 
 .app {
   display: grid;
-  grid-template-columns: 72px 240px 1fr 240px;
+  grid-template-columns: 240px 1fr 240px;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -388,7 +388,7 @@ body {
   .app {
     grid-template-columns: 1fr;
   }
-  .servers-sidebar, .channels-sidebar, .members-sidebar {
+  .channels-sidebar, .members-sidebar {
     display: none;
   }
   .channels-sidebar.mobile-active {
@@ -413,57 +413,8 @@ body {
 
 .app {
   display: grid;
-  grid-template-columns: 72px 240px 1fr 240px;
+  grid-template-columns: 240px 1fr 240px;
   height: 100vh;
-}
-
-/* Servers Sidebar */
-.servers-sidebar {
-  background: var(--bg-primary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px 0;
-  gap: 8px;
-  overflow-y: auto;
-}
-
-.server-icon {
-  width: 48px;
-  height: 48px;
-  background: var(--bg-tertiary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: var(--text-secondary);
-  font-size: 20px;
-}
-
-.server-icon:hover {
-  border-radius: 16px;
-  background: var(--brand-primary);
-  color: var(--text-primary);
-}
-
-.server-icon.home-server {
-  background: var(--brand-primary);
-  color: var(--text-primary);
-}
-
-.server-icon.add-server {
-  background: var(--bg-tertiary);
-  color: var(--success);
-}
-
-.servers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  align-items: center;
 }
 
 /* Channels Sidebar */

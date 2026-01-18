@@ -72,6 +72,9 @@ The application runs as a single Node.js server that serves both the API and sta
 - `POST /api/messages/reply` - Reply to a message with quoted context
 
 ## Recent Changes
+- January 18, 2026: Layout Streamlining
+  - Removed the global servers sidebar (Home/T/+ icons) to simplify navigation
+  - Adjusted grid layout to focus on channel-based communication
 - January 18, 2026: Enhanced User Experience
   - Added "Clear Screen" local button (eraser icon) in the chat header
   - Implemented circular avatar styling with high-quality rendering

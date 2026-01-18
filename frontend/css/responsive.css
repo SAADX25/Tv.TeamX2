@@ -3,7 +3,7 @@
 /* Tablet (max-width: 1024px) */
 @media (max-width: 1024px) {
   .app {
-    grid-template-columns: 72px 200px 1fr;
+    grid-template-columns: 200px 1fr;
   }
   
   .members-sidebar {
@@ -33,33 +33,14 @@
     grid-template-rows: 1fr 60px;
   }
   
-  .servers-sidebar {
-    display: none;
-  }
-  
-  .servers-sidebar.mobile-active {
+  .channels-sidebar.mobile-active {
     display: flex;
     position: fixed;
     right: 0;
     top: 0;
     height: calc(100vh - 60px);
-    width: 72px;
-    z-index: 100;
-    animation: slideInRight 0.3s ease;
-  }
-  
-  .channels-sidebar {
-    display: none;
-  }
-  
-  .channels-sidebar.mobile-active {
-    display: flex;
-    position: fixed;
-    right: 72px;
-    top: 0;
-    height: calc(100vh - 60px);
     width: 240px;
-    z-index: 99;
+    z-index: 100;
     animation: slideInRight 0.3s ease;
   }
   
