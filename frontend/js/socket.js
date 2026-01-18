@@ -56,8 +56,15 @@ const socketModule = {
     // User status events
     this.socket.on('user-status', (data) => {
       console.log('User status changed:', data);
-      // Update user status in UI
       this.updateUserStatus(data.userId, data.status);
+      
+      // If new user joined and they aren't in members list, reload
+      if (data.status === 'online' && window.app) {
+        const existing = document.querySelector(`.member[data-user-id="${data.userId}"]`);
+        if (!existing) {
+          window.app.loadMembers();
+        }
+      }
     });
 
     // Voice channel events

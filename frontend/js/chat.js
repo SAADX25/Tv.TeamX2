@@ -285,6 +285,9 @@ const chat = {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
+
+    // @Mentions highlighting
+    parsed = parsed.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
     
     parsed = parsed.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
       const language = lang || 'javascript';
@@ -426,6 +429,10 @@ const chat = {
 
   receiveMessage(msg) {
     if (msg.channel === this.currentChannel) {
+        // Prevent double messages by checking if message already exists
+        const existing = document.querySelector(`.message[data-message-id="${msg._id || msg.id}"]`);
+        if (existing) return;
+
         this.messages.push(msg);
         const container = document.getElementById('chatMessages');
         const welcome = container.querySelector('.welcome-message');

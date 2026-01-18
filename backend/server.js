@@ -139,7 +139,6 @@ io.on('connection', (socket) => {
   socket.on('user-join', async (data) => {
     try {
       const { token } = data;
-      // التحقق من وجود التوكن لتجنب الأخطاء
       if (!token) return;
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -155,9 +154,14 @@ io.on('connection', (socket) => {
         user.status = 'online';
         await user.save();
         
+        // Broadcast to everyone
         io.emit('user-status', {
           userId: user._id,
-          status: 'online'
+          status: 'online',
+          username: user.username,
+          avatar: user.avatar,
+          role: user.role,
+          nameColor: user.nameColor
         });
         
         console.log('✅ انضم المستخدم:', user.username);
