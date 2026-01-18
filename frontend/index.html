@@ -5,21 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TeamX2 Chat - محادثة TeamX2</title>
   
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
   
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/style. css">
-  <link rel="stylesheet" href="css/animations. css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
-  <!-- Auth Modal -->
   <div id="authModal" class="modal active">
     <div class="modal-content">
       <div class="auth-tabs">
@@ -31,7 +27,6 @@
         </button>
       </div>
 
-      <!-- Login Form -->
       <div id="loginForm" class="auth-form active">
         <h2>مرحباً بعودتك!</h2>
         <p>يسعدنا رؤيتك مجدداً</p>
@@ -50,7 +45,6 @@
         </form>
       </div>
 
-      <!-- Register Form -->
       <div id="registerForm" class="auth-form">
         <h2>إنشاء حساب جديد</h2>
         <p>انضم إلى مجتمع TeamX2</p>
@@ -75,22 +69,18 @@
     </div>
   </div>
 
-  <!-- Main App -->
   <div id="app" class="app" style="display: none;">
-    <!-- Servers Sidebar -->
     <aside class="servers-sidebar">
       <div class="server-icon home-server">
         <i class="fas fa-home"></i>
       </div>
       <div class="servers-list" id="serversList">
-        <!-- Servers will be loaded here -->
-      </div>
+        </div>
       <div class="server-icon add-server">
         <i class="fas fa-plus"></i>
       </div>
     </aside>
 
-    <!-- Channels Sidebar -->
     <aside class="channels-sidebar">
       <div class="server-header">
         <h3 id="serverName">TeamX2 Chat</h3>
@@ -100,7 +90,6 @@
       </div>
       
       <div class="channels-list" id="channelsList">
-        <!-- Text Channels -->
         <div class="channel-category">
           <div class="category-header">
             <i class="fas fa-chevron-down"></i>
@@ -118,7 +107,6 @@
           </div>
         </div>
 
-        <!-- Voice Channels -->
         <div class="channel-category">
           <div class="category-header">
             <i class="fas fa-chevron-down"></i>
@@ -137,7 +125,6 @@
         </div>
       </div>
 
-      <!-- User Section -->
       <div class="user-section">
         <div class="user-info">
           <img src="assets/default-avatar.svg" alt="Avatar" class="user-avatar" id="userAvatar">
@@ -160,7 +147,6 @@
       </div>
     </aside>
 
-    <!-- Main Chat Area -->
     <main class="chat-area">
       <header class="chat-header">
         <div class="channel-info">
@@ -183,10 +169,8 @@
           <h3>مرحباً بك في #<span id="welcomeChannelName">عام</span></h3>
           <p>هذه بداية قناة #<span id="welcomeChannelName2">عام</span></p>
         </div>
-        <!-- Messages will be loaded here -->
-      </div>
+        </div>
 
-      <!-- Typing Indicator -->
       <div class="typing-indicator" id="typingIndicator" style="display: none;">
         <div class="typing-dots">
           <span></span>
@@ -196,7 +180,6 @@
         <span class="typing-text"></span>
       </div>
 
-      <!-- Message Input -->
       <div class="message-input-container">
         <button class="input-btn" id="attachBtn" title="إرفاق ملف">
           <i class="fas fa-plus"></i>
@@ -211,7 +194,6 @@
         </div>
       </div>
 
-      <!-- Emoji Picker -->
       <div class="emoji-picker" id="emojiPicker" style="display: none;">
         <div class="emoji-header">
           <span>اختر إيموجي</span>
@@ -231,7 +213,6 @@
       </div>
     </main>
 
-    <!-- Members Sidebar -->
     <aside class="members-sidebar" id="membersSidebar">
       <div class="members-header">
         <h3>الأعضاء</h3>
@@ -251,7 +232,6 @@
     </aside>
   </div>
 
-  <!-- Upload Modal -->
   <div id="uploadModal" class="modal">
     <div class="modal-content upload-modal">
       <div class="modal-header">
@@ -290,7 +270,30 @@
     </div>
   </div>
 
-  <!-- Context Menu -->
+  <div id="createServerModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>إنشاء سيرفر جديد</h3>
+        <button class="close-modal" id="closeCreateServerModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="createServerForm">
+        <div class="form-group">
+          <label>اسم السيرفر</label>
+          <input type="text" id="serverNameInput" placeholder="أدخل اسم السيرفر المميز" required minlength="3">
+        </div>
+        <div class="form-group">
+          <label>رابط الأيقونة (اختياري)</label>
+          <input type="url" id="serverIconInput" placeholder="https://example.com/image.png">
+        </div>
+        <button type="submit" class="btn-primary">
+          <i class="fas fa-plus-circle"></i> إنشاء السيرفر
+        </button>
+      </form>
+    </div>
+  </div>
+
   <div class="context-menu" id="contextMenu" style="display: none;">
     <div class="context-item" data-action="reply">
       <i class="fas fa-reply"></i> رد
@@ -306,13 +309,10 @@
     </div>
   </div>
 
-  <!-- Toast Notifications -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- Socket.IO -->
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   
-  <!-- JavaScript -->
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/socket.js"></script>

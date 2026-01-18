@@ -27,9 +27,12 @@ console.log('✅ JWT_SECRET موجود');
 console.log('✅ MONGODB_URI موجود:', process.env.MONGODB_URI);
 console.log('✅ جميع المتغيرات البيئية متوفرة');
 
+// استيراد المسارات
 const authRoutes = require('./routes/auth');
 const messagesRoutes = require('./routes/messages');
 const channelsRoutes = require('./routes/channels');
+const serversRoutes = require('./routes/servers'); // ✅ إضافة مسار السيرفرات الجديد
+
 const User = require('./models/User');
 const Message = require('./models/Message');
 
@@ -42,6 +45,10 @@ const io = socketIO(server, {
   }
 });
 
+// ✅ هذا السطر هو الحل لمشكلة ظهور الرسائل!
+// يجعل السوكت متاحاً لملفات الـ API لكي ترسل تنبيهات عند وصول رسالة HTTP
+app.set('io', io);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -51,7 +58,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // File upload configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // استخدام مسار مطلق بدلاً من مسار نسبي
     cb(null, path.join(__dirname, 'uploads'));
   },
   filename: (req, file, cb) => {
@@ -79,6 +85,7 @@ const upload = multer({
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/channels', channelsRoutes);
+app.use('/api/servers', serversRoutes); // ✅ تفعيل مسار السيرفرات
 
 // File upload endpoint
 app.post('/api/upload', upload.single('file'), (req, res) => {
@@ -108,12 +115,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// Handle SPA routing - return index.html for all non-API routes
+// Handle SPA routing
 app.get('*', (req, res, next) => {
   if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
   } else {
-    // إرجاع 404 للـ API routes غير الموجودة
     res.status(404).json({ error: 'المسار غير موجود' });
   }
 });
@@ -133,6 +139,9 @@ io.on('connection', (socket) => {
   socket.on('user-join', async (data) => {
     try {
       const { token } = data;
+      // التحقق من وجود التوكن لتجنب الأخطاء
+      if (!token) return;
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.userId);
       
@@ -154,18 +163,20 @@ io.on('connection', (socket) => {
         console.log('✅ انضم المستخدم:', user.username);
       }
     } catch (error) {
-      console.error('خطأ في user-join:', error);
+      console.error('خطأ في user-join:', error.message);
     }
   });
 
   // Join channel
   socket.on('join-channel', (data) => {
     const { channelId } = data;
-    socket.join(`channel-${channelId}`);
-    console.log(`📢 انضم إلى القناة: ${channelId}`);
+    if (channelId) {
+        socket.join(`channel-${channelId}`);
+        console.log(`📢 انضم إلى القناة: ${channelId}`);
+    }
   });
 
-  // Send message
+  // Send message (عبر السوكت المباشر)
   socket.on('send-message', async (data) => {
     try {
       const { content, channelId, attachments, token } = data;
@@ -185,7 +196,7 @@ io.on('connection', (socket) => {
         message: message.toObject()
       });
       
-      console.log('💬 رسالة جديدة في القناة:', channelId);
+      console.log('💬 رسالة جديدة (Socket):', channelId);
     } catch (error) {
       console.error('خطأ في send-message:', error);
       socket.emit('message-error', { error: 'فشل إرسال الرسالة' });
@@ -197,7 +208,7 @@ io.on('connection', (socket) => {
     const { channelId, isTyping } = data;
     const user = connectedUsers.get(socket.id);
     
-    if (user) {
+    if (user && channelId) {
       socket.to(`channel-${channelId}`).emit('user-typing', {
         userId: user.userId,
         username: user.username,

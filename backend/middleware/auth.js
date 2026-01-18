@@ -1,27 +1,34 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
-const auth = async (req, res, next) => {
+module.exports = (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+    // التحقق من وجود الهيدر
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ error: 'الرجاء تسجيل الدخول' });
+    }
+
+    // استخراج التوكن
+    const token = authHeader.split(' ')[1];
     if (!token) {
-      return res.status(401).json({ error: 'لا يوجد رمز مصادقة' });
+      return res.status(401).json({ error: 'توكن غير صالح' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
-
-    if (!user) {
-      return res.status(401).json({ error: 'المستخدم غير موجود' });
-    }
-
-    req.user = user;
-    req.userId = user._id;
+    // فك التشفير
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // ✅ توحيد بيانات المستخدم في req.user
+    req.user = { 
+      userId: decodedToken.userId,
+      email: decodedToken.email 
+    };
+    
+    // ✅ إضافة req.userId أيضاً لدعم الأكواد القديمة
+    req.userId = decodedToken.userId;
+    
     next();
   } catch (error) {
-    res.status(401).json({ error: 'رمز المصادقة غير صالح' });
+    console.error('Auth Middleware Error:', error.message);
+    res.status(401).json({ error: 'جلسة غير صالحة' });
   }
 };
-
-module.exports = auth;

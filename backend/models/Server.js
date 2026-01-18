@@ -1,15 +1,15 @@
+// backend/models/Server.js
 const mongoose = require('mongoose');
 
 const serverSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true,
-    maxlength: 100
+    trim: true
   },
   icon: {
     type: String,
-    default: 'default-server.svg'
+    default: ''
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -20,16 +20,10 @@ const serverSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
-  roles: [{
-    name: String,
-    permissions: [String],
-    color: String
+  channels: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Channel'
   }],
-  inviteCode: {
-    type: String,
-    unique: true,
-    required: true
-  },
   createdAt: {
     type: Date,
     default: Date.now

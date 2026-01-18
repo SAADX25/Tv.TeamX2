@@ -1,12 +1,8 @@
-// Main App Module
+// frontend/js/app.js
 const app = {
   init() {
     console.log('🚀 Initializing TeamX2 Chat...');
-
-    // Initialize modules
     auth.init();
-    
-    // Only initialize other modules if user is logged in
     if (auth.token) {
       this.initializeApp();
     }
@@ -15,31 +11,20 @@ const app = {
   initializeApp() {
     chat.init();
     fileUpload.init();
-    
     this.setupChannels();
     this.setupUserControls();
     this.setupMembersToggle();
-    this.loadServers();
+    this.loadServers(); // ✅ سيتم استدعاء الدالة المحدثة
   },
 
   setupChannels() {
     const channels = document.querySelectorAll('.channel');
-    
-    if (!channels || channels.length === 0) {
-      console.warn('⚠️  لا توجد قنوات في الصفحة');
-      return;
-    }
-    
     channels.forEach(channel => {
       channel.addEventListener('click', () => {
         const channelId = channel.dataset.channelId;
-        const channelType = channel.dataset.type;
-        
-        if (channelType === 'voice') {
-          // Join voice channel
+        if (channel.dataset.type === 'voice') {
           socketModule.joinVoice(channelId);
         } else {
-          // Load text channel
           chat.loadChannel(channelId);
         }
       });
@@ -47,84 +32,98 @@ const app = {
   },
 
   setupUserControls() {
+    // ... (نفس الكود السابق لأزرار الميكروفون والسماعة) ...
     const muteBtn = document.getElementById('muteBtn');
     const deafenBtn = document.getElementById('deafenBtn');
     const settingsBtn = document.getElementById('settingsBtn');
 
-    if (!muteBtn || !deafenBtn || !settingsBtn) {
-      console.warn('⚠️  بعض عناصر التحكم غير موجودة في الصفحة');
-      return;
+    if (muteBtn) {
+        muteBtn.addEventListener('click', () => {
+        muteBtn.classList.toggle('active');
+        const icon = muteBtn.querySelector('i');
+        icon.className = muteBtn.classList.contains('active') ? 'fas fa-microphone-slash' : 'fas fa-microphone';
+        });
+    }
+    
+    if (deafenBtn) {
+        deafenBtn.addEventListener('click', () => {
+        deafenBtn.classList.toggle('active');
+        const icon = deafenBtn.querySelector('i');
+        icon.className = deafenBtn.classList.contains('active') ? 'fas fa-headphones-slash' : 'fas fa-headphones';
+        });
     }
 
-    // Mute microphone
-    muteBtn.addEventListener('click', () => {
-      muteBtn.classList.toggle('active');
-      const icon = muteBtn.querySelector('i');
-      
-      if (muteBtn.classList.contains('active')) {
-        icon.className = 'fas fa-microphone-slash';
-        utils.showToast('تم كتم الميكروفون', 'warning');
-      } else {
-        icon.className = 'fas fa-microphone';
-        utils.showToast('تم تشغيل الميكروفون', 'success');
-      }
-    });
-
-    // Deafen headphones
-    deafenBtn.addEventListener('click', () => {
-      deafenBtn.classList.toggle('active');
-      const icon = deafenBtn.querySelector('i');
-      
-      if (deafenBtn.classList.contains('active')) {
-        icon.className = 'fas fa-headphones-slash';
-        utils.showToast('تم كتم السماعات', 'warning');
-        // Also mute microphone
-        muteBtn.classList.add('active');
-        muteBtn.querySelector('i').className = 'fas fa-microphone-slash';
-      } else {
-        icon.className = 'fas fa-headphones';
-        utils.showToast('تم تشغيل السماعات', 'success');
-      }
-    });
-
-    // Settings (logout for now)
-    settingsBtn.addEventListener('click', () => {
-      if (confirm('هل تريد تسجيل الخروج؟')) {
-        auth.logout();
-      }
-    });
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+        if (confirm('هل تريد تسجيل الخروج؟')) auth.logout();
+        });
+    }
   },
 
   setupMembersToggle() {
-    const toggleMembersBtn = document.getElementById('toggleMembersBtn');
-    const membersSidebar = document.getElementById('membersSidebar');
-
-    if (!toggleMembersBtn || !membersSidebar) {
-      console.warn('⚠️  عناصر التحكم بقائمة الأعضاء غير موجودة في الصفحة');
-      return;
+    const btn = document.getElementById('toggleMembersBtn');
+    const sidebar = document.getElementById('membersSidebar');
+    if (btn && sidebar) {
+      btn.addEventListener('click', () => sidebar.classList.toggle('active'));
     }
-
-    toggleMembersBtn.addEventListener('click', () => {
-      membersSidebar.classList.toggle('active');
-    });
-
-    // Close on outside click (mobile)
-    document.addEventListener('click', (e) => {
-      if (window.innerWidth <= 1024) {
-        if (!membersSidebar.contains(e.target) && e.target !== toggleMembersBtn && !toggleMembersBtn.contains(e.target)) {
-          membersSidebar.classList.remove('active');
-        }
-      }
-    });
   },
 
+  // ✅ الدالة المحدثة لجلب السيرفرات من الـ API
   async loadServers() {
-    // For now, we'll use dummy data since we don't have a servers endpoint yet
-    // In a real app, this would fetch from the API
-    console.log('Loading servers...');
+    try {
+      console.log('🔄 جاري تحميل السيرفرات...');
+      const response = await fetch(`${API_URL}/servers`, {
+        headers: auth.getAuthHeader()
+      });
+
+      if (!response.ok) throw new Error('فشل تحميل السيرفرات');
+
+      const servers = await response.json();
+      this.renderServers(servers);
+      this.updateMembersList();
+
+    } catch (error) {
+      console.error('Server load error:', error);
+      // utils.showToast('لم نتمكن من تحميل قائمة السيرفرات', 'error');
+    }
+  },
+
+  // ✅ دالة جديدة لعرض السيرفرات في الشريط الجانبي
+  renderServers(servers) {
+    const serversList = document.getElementById('serversList');
+    if (!serversList) return;
     
-    // Update current user in members list
-    this.updateMembersList();
+    serversList.innerHTML = ''; // مسح القائمة الحالية
+
+    servers.forEach(server => {
+      const serverEl = document.createElement('div');
+      serverEl.className = 'server-icon';
+      serverEl.title = server.name;
+      serverEl.dataset.serverId = server._id;
+
+      // إذا كان هناك صورة للسيرفر نعرضها، وإلا نعرض أول حرف
+      if (server.icon) {
+        serverEl.style.backgroundImage = `url(${server.icon})`;
+        serverEl.style.backgroundSize = 'cover';
+        serverEl.style.backgroundPosition = 'center';
+      } else {
+        serverEl.textContent = server.name.charAt(0).toUpperCase();
+        serverEl.style.display = 'flex';
+        serverEl.style.alignItems = 'center';
+        serverEl.style.justifyContent = 'center';
+        serverEl.style.fontWeight = 'bold';
+      }
+
+      // تفعيل السيرفر عند الضغط عليه
+      serverEl.addEventListener('click', () => {
+        document.querySelectorAll('.server-icon').forEach(s => s.classList.remove('active'));
+        serverEl.classList.add('active');
+        console.log('Selected server:', server.name);
+        // هنا يمكنك إضافة منطق لجلب قنوات هذا السيرفر مستقبلاً
+      });
+
+      serversList.appendChild(serverEl);
+    });
   },
 
   updateMembersList() {
@@ -132,21 +131,16 @@ const app = {
     if (currentUserMember && auth.user) {
       const avatar = currentUserMember.querySelector('.member-avatar');
       const name = currentUserMember.querySelector('.member-name');
-      
-      avatar.src = `assets/${auth.user.avatar}`;
+      avatar.src = auth.user.avatar || 'assets/default-avatar.svg';
       name.textContent = auth.user.username;
     }
   }
 };
 
-// Initialize when DOM is ready
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    app.init();
-  });
+  document.addEventListener('DOMContentLoaded', () => app.init());
 } else {
   app.init();
 }
 
-// Export
 window.app = app;
