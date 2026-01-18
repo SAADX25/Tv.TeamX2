@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'default-avatar.svg'
   },
+  // ✅ هذا هو الحقل الناقص الذي أضفناه لحفظ اللون
+  nameColor: {
+    type: String,
+    default: 'default' 
+  },
   status: {
     type: String,
     enum: ['online', 'offline', 'away', 'busy'],
@@ -42,10 +47,9 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Hash password before saving
+// تشفير كلمة المرور قبل الحفظ
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -55,7 +59,7 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Method to compare passwords
+// مقارنة كلمة المرور
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };

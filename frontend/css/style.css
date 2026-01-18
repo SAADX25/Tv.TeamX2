@@ -375,11 +375,14 @@ body {
   color: var(--danger);
 }
 
-/* Chat Area */
+/* ✅ تعديل الواجهة الأساسي لمنع انزلاق الصفحة */
 .chat-area {
   display: flex;
   flex-direction: column;
   background: var(--bg-tertiary);
+  height: 100vh;       /* إجبار الواجهة على أخذ طول الشاشة فقط */
+  overflow: hidden;    /* منع أي سكرول للصفحة نفسها */
+  position: relative;
 }
 
 .chat-header {
@@ -425,10 +428,14 @@ body {
   color: var(--text-primary);
 }
 
+/* ✅ تعديل صندوق الرسائل */
 .chat-messages {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto;    /* السكرول يكون هنا فقط */
   padding: 16px;
+  padding-bottom: 30px; /* مسافة سفلية إضافية */
+  padding-right: 20px;  /* مسافة يمنى لمنع الالتصاق */
+  scroll-behavior: smooth;
 }
 
 .welcome-message {
@@ -490,12 +497,15 @@ body {
   color: var(--text-muted);
 }
 
+/* ✅ تنسيق النص ليدعم الأسطر الجديدة */
 .message-text {
   color: var(--text-primary);
   line-height: 1.5;
   word-wrap: break-word;
+  white-space: pre-wrap; /* يدعم النزول لسطر جديد */
 }
 
+/* ✅ تنسيق المرفقات */
 .message-attachment {
   margin-top: 8px;
   max-width: 400px;
@@ -503,8 +513,28 @@ body {
 
 .message-attachment img {
   width: 100%;
+  max-height: 300px;
+  object-fit: contain;
   border-radius: 8px;
   cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.message-attachment.file-link a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-primary);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  text-decoration: none;
+  color: var(--brand-primary);
+  width: fit-content;
+}
+
+.message-attachment.file-link a:hover {
+  background: var(--bg-hover);
 }
 
 .attachment-file {
@@ -569,7 +599,7 @@ body {
   animation-delay: 0.4s;
 }
 
-/* Message Input */
+/* ✅ تعديل حاوية الإدخال */
 .message-input-container {
   padding: 24px 16px;
   display: flex;
@@ -579,11 +609,14 @@ body {
 .message-input-wrapper {
   flex: 1;
   display: flex;
+  align-items: center; /* توسيط عمودي للأزرار */
   background: var(--bg-hover);
   border-radius: 8px;
   overflow: hidden;
+  min-height: 48px;
 }
 
+/* ✅ تنسيق Textarea الجديد */
 #messageInput {
   flex: 1;
   padding: 12px 16px;
@@ -592,6 +625,11 @@ body {
   color: var(--text-primary);
   font-family: 'Cairo', sans-serif;
   font-size: 15px;
+  resize: none; /* منع تغيير الحجم يدوياً */
+  height: auto;
+  max-height: 120px; /* أقصى ارتفاع قبل ظهور سكرول داخلي */
+  overflow-y: auto;
+  line-height: 1.5;
 }
 
 #messageInput:focus {
@@ -971,4 +1009,53 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #4a4d57;
+}
+
+/* ✅ الألوان المخصصة (جديد) */
+@keyframes rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.name-col-rainbow {
+  background: linear-gradient(270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rainbow 5s ease infinite;
+  font-weight: bold;
+}
+
+.name-col-red {
+  color: #ff3333 !important;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.6), 0 0 20px rgba(255, 0, 0, 0.4);
+  font-weight: bold;
+}
+
+.name-col-blue {
+  color: #00ffff !important;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.6), 0 0 20px rgba(0, 255, 255, 0.4);
+  font-weight: bold;
+}
+
+.name-col-gold {
+  background: linear-gradient(to bottom, #ffd700, #b8860b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+  font-weight: bold;
+}
+
+.name-col-green {
+  color: #00ff00 !important;
+  text-shadow: 0 0 8px #00ff00;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+.name-col-default {
+  color: var(--text-primary);
 }

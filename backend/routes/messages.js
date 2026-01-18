@@ -9,18 +9,17 @@ router.get('/channel/:channelId', auth, async (req, res) => {
   try {
     const { channelId } = req.params;
 
-    // ✅ إصلاح 1: التحقق من أن معرف القناة صالح لتجنب توقف السيرفر
     if (!mongoose.Types.ObjectId.isValid(channelId)) {
-      // إذا كان المعرف غير صالح (مثل كلمة "general") نرجع قائمة فارغة بدلاً من الخطأ
       return res.json({ messages: [] });
     }
 
     const messages = await Message.find({ channel: channelId })
-      .sort({ createdAt: -1 }) // الأحدث أولاً
+      .sort({ createdAt: -1 })
       .limit(50)
-      .populate('author', 'username avatar status');
+      // ✅ التعديل الضروري هنا: أضفنا nameColor
+      .populate('author', 'username avatar status nameColor');
 
-    res.json({ messages: messages.reverse() }); // نعكسها للعرض الصحيح
+    res.json({ messages: messages.reverse() });
   } catch (error) {
     console.error('Get messages error:', error);
     res.status(500).json({ error: 'خطأ في جلب الرسائل' });
@@ -31,15 +30,12 @@ router.get('/channel/:channelId', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
   try {
     const { content, channelId, attachments } = req.body;
-
-    // ✅ إصلاح 2: التأكد من هوية المستخدم
     const userId = req.user.userId;
 
     if (!channelId) {
       return res.status(400).json({ error: 'خطأ: لم يتم تحديد القناة' });
     }
 
-    // منع الرسائل الفارغة تماماً
     if (!content && (!attachments || attachments.length === 0)) {
       return res.status(400).json({ error: 'لا يمكن إرسال رسالة فارغة' });
     }
@@ -53,8 +49,16 @@ router.post('/', auth, async (req, res) => {
 
     await message.save();
     
-    // جلب بيانات المرسل (الصورة والاسم) لإظهارها فوراً
-    await message.populate('author', 'username avatar status');
+    // ✅ التعديل الضروري هنا أيضاً: أضفنا nameColor ليظهر اللون فوراً
+    await message.populate('author', 'username avatar status nameColor');
+
+    // إرسال عبر السوكت
+    const io = req.app.get('io');
+    if (io) {
+        io.to(`channel-${channelId}`).emit('new-message', {
+            message: message.toObject()
+        });
+    }
 
     res.status(201).json({ message });
   } catch (error) {
@@ -71,12 +75,19 @@ router.delete('/:id', auth, async (req, res) => {
 
     if (!message) return res.status(404).json({ error: 'الرسالة غير موجودة' });
 
-    // التحقق من الملكية
     if (message.author.toString() !== req.user.userId) {
       return res.status(403).json({ error: 'ليست لديك صلاحية الحذف' });
     }
 
+    const channelId = message.channel;
     await message.deleteOne();
+
+    // إبلاغ الجميع بالحذف
+    const io = req.app.get('io');
+    if (io) {
+        io.to(`channel-${channelId}`).emit('message-deleted', { messageId: id });
+    }
+
     res.json({ message: 'تم الحذف' });
   } catch (error) {
     res.status(500).json({ error: 'خطأ في الحذف' });

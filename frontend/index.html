@@ -69,7 +69,51 @@
     </div>
   </div>
 
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>إعدادات الحساب</h3>
+        <button class="close-modal" id="closeSettingsModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="settingsForm">
+        <div class="form-group">
+          <label>اسم المستخدم الجديد</label>
+          <input type="text" id="settingsUsername" required>
+        </div>
+        
+        <div class="form-group">
+            <label>لون الاسم المميز</label>
+            <select id="settingsNameColor" style="width: 100%; padding: 12px; background: var(--bg-primary); border: 2px solid var(--border-color); color: var(--text-primary); border-radius: 8px; font-family: 'Cairo', sans-serif;">
+                <option value="default">افتراضي (أبيض)</option>
+                <option value="rainbow">🌈 قوس قزح متحرك</option>
+                <option value="red">🔥 أحمر متوهج</option>
+                <option value="blue">💎 أزرق نيون</option>
+                <option value="gold">👑 ذهبي فاخر</option>
+                <option value="green">👽 أخضر هكر</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+          <label>رابط الصورة الشخصية (URL)</label>
+          <input type="text" id="settingsAvatar" placeholder="https://...">
+        </div>
+        
+        <div class="modal-actions" style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="button" class="btn-primary" id="logoutBtn" style="background: var(--danger);">
+                <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+            </button>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i> حفظ التغييرات
+            </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="app" class="app" style="display: none;">
+    
     <aside class="servers-sidebar">
       <div class="server-icon home-server">
         <i class="fas fa-home"></i>
@@ -169,7 +213,7 @@
           <h3>مرحباً بك في #<span id="welcomeChannelName">عام</span></h3>
           <p>هذه بداية قناة #<span id="welcomeChannelName2">عام</span></p>
         </div>
-        </div>
+      </div>
 
       <div class="typing-indicator" id="typingIndicator" style="display: none;">
         <div class="typing-dots">
@@ -185,7 +229,7 @@
           <i class="fas fa-plus"></i>
         </button>
         <div class="message-input-wrapper">
-          <input type="text" id="messageInput" placeholder="أرسل رسالة إلى #عام" autocomplete="off">
+          <textarea id="messageInput" placeholder="أرسل رسالة إلى #عام" rows="1"></textarea>
           <div class="input-actions">
             <button class="input-btn" id="emojiBtn" title="اختر إيموجي">
               <i class="far fa-smile"></i>
@@ -199,17 +243,7 @@
           <span>اختر إيموجي</span>
         </div>
         <div class="emoji-grid">
-          😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 
-          🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 
-          😋 😛 😝 😜 🤪 🤨 🧐 🤓 😎 🤩 
-          🥳 😏 😒 😞 😔 😟 😕 🙁 ☹️ 😣 
-          😖 😫 😩 🥺 😢 😭 😤 😠 😡 🤬 
-          👍 👎 👊 ✊ 🤛 🤜 🤞 ✌️ 🤟 🤘 
-          👌 🤌 🤏 👈 👉 👆 👇 ☝️ ✋ 🤚 
-          🖐 🖖 👋 🤙 💪 🦾 🙏 ✍️ 💅 🤳 
-          ❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 
-          ❣️ 💕 💞 💓 💗 💖 💘 💝 💟 ☮️
-        </div>
+          </div>
       </div>
     </main>
 
@@ -312,7 +346,6 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-  
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/socket.js"></script>
