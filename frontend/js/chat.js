@@ -20,6 +20,20 @@ const chat = {
     }
 
     if (window.socketModule && socketModule.socket) {
+        socketModule.socket.on('all-messages-deleted-in-channel', ({ channelId }) => {
+            if (this.currentChannel === channelId) {
+                const container = document.getElementById('chatMessages');
+                if (container) {
+                  const msgs = container.querySelectorAll('.message');
+                  msgs.forEach(m => m.remove());
+                  const welcome = container.querySelector('.welcome-message');
+                  if(welcome) welcome.style.display = 'block';
+                }
+                this.messages = [];
+                utils.showToast('تم مسح جميع رسائل هذه القناة من قبل المسؤول', 'info');
+            }
+        });
+
         socketModule.socket.on('all-messages-deleted', () => {
             const container = document.getElementById('chatMessages');
             if (container) {
@@ -600,17 +614,40 @@ const chat = {
     this.showTyping({ username, isTyping: false });
   },
 
-  clearMessages() {
-    if (!confirm('هل تريد مسح الرسائل من الشاشة؟ (سيتم مسحها عندك فقط)')) return;
-    const container = document.getElementById('chatMessages');
-    if (container) {
-      const msgs = container.querySelectorAll('.message');
-      msgs.forEach(m => m.remove());
-      const welcome = container.querySelector('.welcome-message');
-      if(welcome) welcome.style.display = 'block';
+  async clearMessages() {
+    if (auth.user?.role !== 'owner' && auth.user?.role !== 'admin') {
+      // Local clear only for members
+      if (!confirm('هل تريد مسح الرسائل من الشاشة؟ (سيتم مسحها عندك فقط)')) return;
+      const container = document.getElementById('chatMessages');
+      if (container) {
+        const msgs = container.querySelectorAll('.message');
+        msgs.forEach(m => m.remove());
+        const welcome = container.querySelector('.welcome-message');
+        if(welcome) welcome.style.display = 'block';
+      }
+      this.messages = [];
+      utils.showToast('تم مسح الرسائل محلياً', 'info');
+      return;
     }
-    this.messages = [];
-    utils.showToast('تم مسح الرسائل محلياً', 'info');
+
+    if (!confirm('هل تريد مسح الرسائل من القناة نهائياً للجميع؟')) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/messages/channel/${this.currentChannel}`, {
+        method: 'DELETE',
+        headers: auth.getAuthHeader()
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'فشل مسح القناة');
+      }
+      
+      utils.showToast('تم مسح القناة بنجاح للجميع', 'success');
+    } catch (error) {
+      console.error('Clear channel error:', error);
+      utils.showToast(error.message, 'error');
+    }
   }
 };
 

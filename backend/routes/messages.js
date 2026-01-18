@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Message = require('../models/Message');
+const User = require('../models/User');
 const auth = require('../middleware/auth');
 
 // جلب رسائل قناة معينة
@@ -223,6 +224,31 @@ router.delete('/:id', auth, async (req, res) => {
     res.json({ message: 'تم الحذف' });
   } catch (error) {
     res.status(500).json({ error: 'خطأ في الحذف' });
+  }
+});
+
+// حذف جميع رسائل قناة معينة
+router.delete('/channel/:channelId', auth, async (req, res) => {
+  try {
+    const { channelId } = req.params;
+    
+    // التحقق من الصلاحيات (اختياري: هل نسمح لأي شخص بمسح القناة؟ عادة فقط المالك أو المشرف)
+    const user = await User.findById(req.user.userId);
+    if (user.role !== 'owner' && user.role !== 'admin') {
+      return res.status(403).json({ error: 'غير مصرح لك بمسح القناة' });
+    }
+
+    await Message.deleteMany({ channel: channelId });
+    
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`channel-${channelId}`).emit('all-messages-deleted-in-channel', { channelId });
+    }
+
+    res.json({ message: 'تم مسح القناة بنجاح' });
+  } catch (error) {
+    console.error('Delete channel messages error:', error);
+    res.status(500).json({ error: 'خطأ في مسح القناة' });
   }
 });
 
