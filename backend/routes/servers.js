@@ -7,12 +7,51 @@ const auth = require('../middleware/auth'); // استيراد ملف التحق�
 // جلب جميع السيرفرات الخاصة بالمستخدم
 router.get('/', auth, async (req, res) => {
   try {
-    const servers = await Server.find({
+    console.log(`📡 Fetching servers for user: ${req.user.userId}`);
+    let servers = await Server.find({
       $or: [
         { owner: req.user.userId },
         { members: req.user.userId }
       ]
-    }).select('name icon'); // نختار فقط الاسم والأيقونة للعرض في القائمة
+    }).select('name icon');
+    
+    // ✅ إذا لم يكن للمستخدم أي سيرفر، نحاول إضافته للسيرفر الرئيسي أو إنشاؤه
+    if (servers.length === 0) {
+      console.log(`🔍 User ${req.user.userId} has no servers, looking for any server in DB...`);
+      let mainServer = await Server.findOne(); 
+      
+      if (!mainServer) {
+        console.log('✨ No servers found in DB at all. Creating default...');
+        mainServer = new Server({
+          name: 'TeamX2 Community',
+          owner: req.user.userId,
+          members: [req.user.userId]
+        });
+        await mainServer.save();
+        
+        const Channel = require('../models/Channel');
+        const general = new Channel({ name: 'عام', type: 'text', server: mainServer._id, category: 'general' });
+        const voice = new Channel({ name: 'صالة الصوت', type: 'voice', server: mainServer._id, category: 'voice' });
+        await Promise.all([general.save(), voice.save()]);
+      } else {
+        console.log(`🤝 Found a server: ${mainServer.name} (${mainServer._id}). Ensuring user is member...`);
+        await Server.updateOne(
+          { _id: mainServer._id },
+          { $addToSet: { members: req.user.userId } }
+        );
+        
+        const Channel = require('../models/Channel');
+        const channelCount = await Channel.countDocuments({ server: mainServer._id });
+        if (channelCount === 0) {
+          console.log('📢 No channels found for existing server. Creating defaults...');
+          const general = new Channel({ name: 'عام', type: 'text', server: mainServer._id, category: 'general' });
+          const voice = new Channel({ name: 'صالة الصوت', type: 'voice', server: mainServer._id, category: 'voice' });
+          await Promise.all([general.save(), voice.save()]);
+        }
+        
+        servers = [{ _id: mainServer._id, name: mainServer.name, icon: mainServer.icon }];
+      }
+    }
     
     res.json(servers);
   } catch (error) {

@@ -258,25 +258,37 @@ const chat = {
 
   async loadChannels() {
     try {
+      if (!auth.token) {
+        console.warn('⏳ Waiting for auth token before loading channels...');
+        return;
+      }
+
       // ✅ جلب أول سيرفر متاح للمستخدم بدلاً من المعرف الثابت
       let serverId = localStorage.getItem('currentServerId');
       
-      if (!serverId) {
+      if (!serverId || serverId === 'null' || serverId === 'undefined') {
+        console.log('🔄 محاولة جلب السيرفرات...');
         const serverRes = await fetch(`${API_URL}/servers`, { headers: auth.getAuthHeader() });
         const servers = await serverRes.json();
         console.log('📡 السيرفرات المتاحة:', servers);
-        if (servers && servers.length > 0) {
+        
+        if (Array.isArray(servers) && servers.length > 0) {
           serverId = servers[0]._id || servers[0].id;
           localStorage.setItem('currentServerId', serverId);
           console.log('✅ تم اختيار السيرفر:', serverId);
+          // إعادة تحميل القنوات فوراً بعد تعيين السيرفر
+          return this.loadChannels();
+        } else {
+          console.warn('⚠️ لم يتم العثور على أي سيرفر للمستخدم');
+          return;
         }
       }
 
-      if (!serverId) return;
-
+      console.log(`📡 Loading channels for server: ${serverId}`);
       const res = await fetch(`${API_URL}/channels/server/${serverId}`, { headers: auth.getAuthHeader() });
       const data = await res.json();
       const channels = data.channels || [];
+      console.log('✅ Channels loaded:', channels.length);
       this.renderChannels(channels);
       
       // Load first text channel by default if none selected
@@ -294,6 +306,7 @@ const chat = {
     const voiceList = document.getElementById('voiceChannelsList');
     if (!textList || !voiceList) return;
 
+    console.log(`🖌️ Rendering ${channels.length} channels...`);
     textList.innerHTML = '';
     voiceList.innerHTML = '';
 
@@ -333,10 +346,13 @@ const chat = {
         }
       };
 
-      div.querySelector('.channel-settings-btn').onclick = (e) => {
-        e.stopPropagation();
-        this.showChannelModal(ch);
-      };
+      const settingsBtn = div.querySelector('.channel-settings-btn');
+      if (settingsBtn) {
+        settingsBtn.onclick = (e) => {
+          e.stopPropagation();
+          this.showChannelModal(ch);
+        };
+      }
     });
   },
 
@@ -620,9 +636,10 @@ const chat = {
 
             const res = await fetch(`${API_URL}/upload`, {
               method: 'POST',
-              headers: { 'Authorization': `Bearer ${auth.token}` },
+              headers: auth.getAuthHeader(),
               body: formData
             });
+            if (!res.ok) throw new Error('فشل رفع الملف');
             const data = await res.json();
             if (data.url) {
               socketModule.sendMessage('', [data.url]);

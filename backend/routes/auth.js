@@ -30,6 +30,18 @@ router.post('/register', async (req, res) => {
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
+    // ✅ إضافة المستخدم للسيرفر الرئيسي عند التسجيل
+    try {
+      const Server = require('../models/Server');
+      const mainServer = await Server.findOne({ name: 'TeamX2 Community' });
+      if (mainServer && !mainServer.members.includes(user._id)) {
+        mainServer.members.push(user._id);
+        await mainServer.save();
+      }
+    } catch (err) {
+      console.error('Error adding user to main server:', err);
+    }
+
     res.status(201).json({
       message: 'تم التسجيل بنجاح',
       token,
@@ -64,6 +76,18 @@ router.post('/login', async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ error: 'البيانات غير صحيحة' });
+    }
+
+    // ✅ التأكد من انضمام المستخدم للسيرفر الرئيسي عند الدخول
+    try {
+      const Server = require('../models/Server');
+      const mainServer = await Server.findOne({ name: 'TeamX2 Community' });
+      if (mainServer && !mainServer.members.includes(user._id)) {
+        mainServer.members.push(user._id);
+        await mainServer.save();
+      }
+    } catch (err) {
+      console.error('Error adding user to main server on login:', err);
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });

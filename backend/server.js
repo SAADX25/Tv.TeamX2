@@ -138,34 +138,33 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/teamx2-ch
       if (serverCount === 0) {
         const User = require('./models/User');
         const Channel = require('./models/Channel');
-        const owner = await User.findOne();
-        if (owner) {
-          const defaultServer = new Server({
-            name: 'TeamX2 Community',
-            owner: owner._id,
-            members: [owner._id]
-          });
-          await defaultServer.save();
-          
-          // إنشاء قنوات افتراضية
-          const generalChannel = new Channel({
-            name: 'عام',
-            type: 'text',
-            server: defaultServer._id,
-            category: 'general'
-          });
-          await generalChannel.save();
+        
+        // إنشاء سيرفر "عام"
+        const defaultServer = new Server({
+          name: 'TeamX2 Community',
+          owner: new mongoose.Types.ObjectId(), // معرف مؤقت
+          members: []
+        });
+        await defaultServer.save();
+        
+        // إنشاء قنوات افتراضية
+        const generalChannel = new Channel({
+          name: 'عام',
+          type: 'text',
+          server: defaultServer._id,
+          category: 'general'
+        });
+        await generalChannel.save();
 
-          const voiceChannel = new Channel({
-            name: 'صالة الصوت',
-            type: 'voice',
-            server: defaultServer._id,
-            category: 'voice'
-          });
-          await voiceChannel.save();
+        const voiceChannel = new Channel({
+          name: 'صالة الصوت',
+          type: 'voice',
+          server: defaultServer._id,
+          category: 'voice'
+        });
+        await voiceChannel.save();
 
-          console.log('✅ تم إنشاء السيرفر والقنوات الافتراضية بنجاح');
-        }
+        console.log('✅ تم إنشاء السيرفر والقنوات الافتراضية بنجاح');
       }
     } catch (err) {
       console.error('❌ خطأ في تهيئة السيرفر الافتراضي:', err);
