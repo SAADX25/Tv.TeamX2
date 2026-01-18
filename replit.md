@@ -23,6 +23,7 @@ A Discord-like chat application with real-time messaging, file uploads, and user
 - **Database**: MongoDB (via MongoDB Atlas)
 - **Authentication**: JWT with bcrypt password hashing
 - **File Upload**: Multer
+- **Security**: Helmet, express-rate-limit, xss-clean
 - **Frontend**: Vanilla JavaScript, HTML5, CSS3
 
 ## Running the Application
@@ -71,7 +72,22 @@ The application runs as a single Node.js server that serves both the API and sta
 - `POST /api/messages/:id/reactions` - Toggle emoji reaction on message
 - `POST /api/messages/reply` - Reply to a message with quoted context
 
+## Security Features
+- **Helmet**: HTTP security headers protection
+- **Rate Limiting**: 20 requests/15min for auth, 100 requests/min for API
+- **XSS Protection**: Automatic input sanitization
+- **Hidden Credentials**: MongoDB URI and secrets not logged
+- **Request Limits**: 10MB max body size
+- **Password Hashing**: bcrypt with salt
+
 ## Recent Changes
+- January 18, 2026: Security Improvements
+  - Added Helmet for HTTP security headers
+  - Added Rate Limiting to prevent brute-force attacks
+  - Added XSS sanitization for all inputs
+  - Hidden MongoDB credentials from server logs
+  - Fixed emoji picker data corruption (text strings replaced with actual emojis)
+  - Fixed avatar URL double-prefix bug in profile settings
 - January 18, 2026: Channel Management Improvements
   - Added proper response validation before closing channel modals
   - Added success/error toast messages for create, edit, and delete operations
