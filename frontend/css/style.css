@@ -907,26 +907,75 @@ body {
 .emoji-picker {
   position: absolute;
   bottom: 100px;
-  right: 280px;
-  width: 320px;
-  background: var(--bg-secondary);
+  left: 30px;
+  width: 350px;
+  background: rgba(15, 15, 23, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  z-index: 100;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
 }
 
 .emoji-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-color);
-  font-weight: 600;
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.emoji-tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.emoji-tab {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.emoji-tab:hover, .emoji-tab.active {
+  color: var(--brand-primary);
+  background: rgba(88, 101, 242, 0.1);
+}
+
+.emoji-search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.emoji-search-container input {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 32px 8px 12px;
+  color: var(--text-primary);
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+}
+
+.emoji-search-container i {
+  position: absolute;
+  right: 10px;
+  color: var(--text-muted);
+  font-size: 14px;
 }
 
 .emoji-grid {
-  padding: 16px;
+  padding: 12px;
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: 8px;
-  max-height: 300px;
+  max-height: 250px;
   overflow-y: auto;
   font-size: 24px;
   text-align: center;
@@ -935,12 +984,23 @@ body {
 .emoji-grid span {
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
-  transition: background 0.2s ease;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
 .emoji-grid span:hover {
-  background: var(--bg-hover);
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.2);
+}
+
+.emoji-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.emoji-grid::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
 }
 
 /* Members Sidebar */

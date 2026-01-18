@@ -256,9 +256,20 @@
 
       <div class="emoji-picker" id="emojiPicker" style="display: none;">
         <div class="emoji-header">
-          <span>اختر إيموجي</span>
+          <div class="emoji-tabs">
+            <button class="emoji-tab active" data-category="all" title="الكل"><i class="fas fa-globe"></i></button>
+            <button class="emoji-tab" data-category="smileys" title="وجوه"><i class="far fa-smile"></i></button>
+            <button class="emoji-tab" data-category="animals" title="حيوانات ونباتات"><i class="fas fa-leaf"></i></button>
+            <button class="emoji-tab" data-category="food" title="طعام"><i class="fas fa-pizza-slice"></i></button>
+            <button class="emoji-tab" data-category="activities" title="أنشطة"><i class="fas fa-basketball-ball"></i></button>
+            <button class="emoji-tab" data-category="objects" title="أشياء"><i class="fas fa-lightbulb"></i></button>
+          </div>
+          <div class="emoji-search-container">
+            <input type="text" id="emojiSearch" placeholder="بحث عن إيموجي...">
+            <i class="fas fa-search"></i>
+          </div>
         </div>
-        <div class="emoji-grid">
+        <div class="emoji-grid" id="emojiGrid">
           </div>
       </div>
     </main>
