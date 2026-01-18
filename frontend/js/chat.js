@@ -16,10 +16,15 @@ const chat = {
             if (el) el.remove();
         });
         
-        // استقبال الرسائل الجديدة
-        socketModule.socket.on('new-message', ({ message }) => {
-            this.receiveMessage(message);
-        });
+        // ✅ هذا السطر هو الحل السحري: يحذف أي مستمع قديم قبل إضافة الجديد
+socket.off('new-message'); 
+
+socket.on('new-message', (data) => {
+    console.log("📩 وصلت رسالة جديدة:", data);
+    // تأكد أنك لا تقوم بإضافة الرسالة إذا كانت موجودة بالفعل (اختياري)
+    this.appendMessage(data.message); 
+    this.scrollToBottom();
+});
     }
   },
 
