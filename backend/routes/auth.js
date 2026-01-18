@@ -10,12 +10,14 @@ router.post('/register', async (req, res) => {
     console.log('📝 طلب تسجيل جديد...');
     const { username, email, password } = req.body;
 
-    // طباعة البيانات المستلمة (بدون كلمة المرور الفعلية)
-    console.log('📝 البيانات المستلمة:', {
-      username: username || 'غير موجود',
-      email: email || 'غير موجود',
-      hasPassword: !!password
-    });
+    // طباعة البيانات المستلمة (بدون كلمة المرور الفعلية) - فقط في التطوير
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('📝 البيانات المستلمة:', {
+        username: username || 'غير موجود',
+        email: email || 'غير موجود',
+        hasPassword: !!password
+      });
+    }
 
     // Validation - التحقق من الحقول المطلوبة
     const missingFields = [];
@@ -154,7 +156,7 @@ router.post('/register', async (req, res) => {
     
     // MongoServerError - خطأ duplicate key (11000)
     else if (error.name === 'MongoServerError' || error.name === 'MongoError') {
-      if (error.code === 11000) {
+      if (error.code === 11000 && error.keyValue) {
         console.error('❌ خطأ مفتاح مكرر (11000):', error.keyValue);
         const duplicateField = Object.keys(error.keyValue)[0];
         errorResponse = {
@@ -162,8 +164,7 @@ router.post('/register', async (req, res) => {
           details: {
             type: 'DUPLICATE_KEY',
             message: duplicateField === 'email' ? 'البريد الإلكتروني مستخدم بالفعل' : 'اسم المستخدم مستخدم بالفعل',
-            field: duplicateField,
-            value: error.keyValue[duplicateField]
+            field: duplicateField
           }
         };
       } else {
@@ -202,11 +203,13 @@ router.post('/login', async (req, res) => {
     console.log('📝 طلب تسجيل دخول جديد...');
     const { email, password } = req.body;
 
-    // طباعة البيانات المستلمة (بدون كلمة المرور الفعلية)
-    console.log('📝 البيانات المستلمة:', {
-      email: email || 'غير موجود',
-      hasPassword: !!password
-    });
+    // طباعة البيانات المستلمة (بدون كلمة المرور الفعلية) - فقط في التطوير
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('📝 البيانات المستلمة:', {
+        email: email || 'غير موجود',
+        hasPassword: !!password
+      });
+    }
 
     // Validation
     if (!email || !password) {
