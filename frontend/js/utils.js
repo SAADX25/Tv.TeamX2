@@ -144,6 +144,13 @@ const utils = {
   // Check if file is an image
   isImage(mimetype) {
     return mimetype.startsWith('image/');
+  },
+
+  // ✅ جلب رابط الصورة الشخصية مع معالجة المسارات والافتراضيات
+  getAvatarUrl(avatar) {
+    if (!avatar || avatar === 'default-avatar.svg') return 'assets/default-avatar.svg';
+    if (avatar.startsWith('http') || avatar.startsWith('assets/')) return avatar;
+    return `/uploads/${avatar}`;
   }
 };
 

@@ -214,7 +214,7 @@ const auth = {
 
     // Update user info
     document.getElementById('currentUsername').textContent = this.user.username;
-    document.getElementById('userAvatar').src = `assets/${this.user.avatar}`;
+    document.getElementById('userAvatar').src = utils.getAvatarUrl(this.user.avatar);
 
     // Initialize socket connection
     if (window.socketModule) {

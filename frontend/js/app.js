@@ -207,11 +207,8 @@ const app = {
   updateMembersList() {
     const member = document.getElementById('currentUserMember');
     if (member && auth.user) {
-      let avatarSrc = auth.user.avatar || 'assets/default-avatar.svg';
-      if (avatarSrc && !avatarSrc.startsWith('http') && !avatarSrc.startsWith('assets/')) {
-          avatarSrc = `/uploads/${avatarSrc}`;
-      }
-      member.querySelector('.member-avatar').src = avatarSrc;
+      member.querySelector('.member-avatar').src = utils.getAvatarUrl(auth.user.avatar);
+      member.querySelector('.member-avatar').onerror = function() { this.src = 'assets/default-avatar.svg'; };
       const nameEl = member.querySelector('.member-name');
       nameEl.textContent = auth.user.username;
       
@@ -232,11 +229,8 @@ const app = {
     const username = document.getElementById('currentUsername');
     if (auth.user) {
       if (avatar) {
-        let avatarSrc = auth.user.avatar || 'assets/default-avatar.svg';
-        if (avatarSrc && !avatarSrc.startsWith('http') && !avatarSrc.startsWith('assets/')) {
-            avatarSrc = `/uploads/${avatarSrc}`;
-        }
-        avatar.src = avatarSrc;
+        avatar.src = utils.getAvatarUrl(auth.user.avatar);
+        avatar.onerror = function() { this.src = 'assets/default-avatar.svg'; };
       }
       if (username) {
         username.textContent = auth.user.username;

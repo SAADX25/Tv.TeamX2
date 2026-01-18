@@ -428,14 +428,11 @@ const chat = {
       `;
     }
 
-    let avatarSrc = msg.author?.avatar || 'assets/default-avatar.svg';
-    if (avatarSrc && !avatarSrc.startsWith('http') && !avatarSrc.startsWith('assets/')) {
-        avatarSrc = `/uploads/${avatarSrc}`;
-    }
+    let avatarSrc = utils.getAvatarUrl(msg.author?.avatar);
 
     div.innerHTML = `
       <div class="avatar-container">
-        <img src="${avatarSrc}" class="message-avatar">
+        <img src="${avatarSrc}" class="message-avatar" onerror="this.src='assets/default-avatar.svg'">
         ${statusDot}
       </div>
       <div class="message-content">
