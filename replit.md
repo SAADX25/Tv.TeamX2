@@ -72,6 +72,11 @@ The application runs as a single Node.js server that serves both the API and sta
 - `POST /api/messages/reply` - Reply to a message with quoted context
 
 ## Recent Changes
+- January 18, 2026: Channel Management Improvements
+  - Added proper response validation before closing channel modals
+  - Added success/error toast messages for create, edit, and delete operations
+  - Added client-side validation for channel name and server ID
+  - Improved error handling with detailed console logging
 - January 18, 2026: Layout Streamlining
   - Removed the global servers sidebar (Home/T/+ icons) to simplify navigation
   - Adjusted grid layout to focus on channel-based communication
