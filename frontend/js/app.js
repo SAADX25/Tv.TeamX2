@@ -25,6 +25,11 @@ const app = {
   setupChannels() {
     const channels = document.querySelectorAll('.channel');
     
+    if (!channels || channels.length === 0) {
+      console.warn('⚠️  لا توجد قنوات في الصفحة');
+      return;
+    }
+    
     channels.forEach(channel => {
       channel.addEventListener('click', () => {
         const channelId = channel.dataset.channelId;
@@ -45,6 +50,11 @@ const app = {
     const muteBtn = document.getElementById('muteBtn');
     const deafenBtn = document.getElementById('deafenBtn');
     const settingsBtn = document.getElementById('settingsBtn');
+
+    if (!muteBtn || !deafenBtn || !settingsBtn) {
+      console.warn('⚠️  بعض عناصر التحكم غير موجودة في الصفحة');
+      return;
+    }
 
     // Mute microphone
     muteBtn.addEventListener('click', () => {
@@ -88,6 +98,11 @@ const app = {
   setupMembersToggle() {
     const toggleMembersBtn = document.getElementById('toggleMembersBtn');
     const membersSidebar = document.getElementById('membersSidebar');
+
+    if (!toggleMembersBtn || !membersSidebar) {
+      console.warn('⚠️  عناصر التحكم بقائمة الأعضاء غير موجودة في الصفحة');
+      return;
+    }
 
     toggleMembersBtn.addEventListener('click', () => {
       membersSidebar.classList.toggle('active');

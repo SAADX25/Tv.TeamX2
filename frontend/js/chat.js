@@ -15,6 +15,11 @@ const chat = {
   setupMessageInput() {
     const messageInput = document.getElementById('messageInput');
     
+    if (!messageInput) {
+      console.warn('⚠️  messageInput غير موجود');
+      return;
+    }
+    
     // Send message on Enter
     messageInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -40,6 +45,11 @@ const chat = {
     const emojiBtn = document.getElementById('emojiBtn');
     const emojiPicker = document.getElementById('emojiPicker');
     const messageInput = document.getElementById('messageInput');
+
+    if (!emojiBtn || !emojiPicker || !messageInput) {
+      console.warn('⚠️  عناصر emoji picker غير موجودة');
+      return;
+    }
 
     emojiBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -68,6 +78,11 @@ const chat = {
   setupContextMenu() {
     const contextMenu = document.getElementById('contextMenu');
     const chatMessages = document.getElementById('chatMessages');
+
+    if (!contextMenu || !chatMessages) {
+      console.warn('⚠️  عناصر context menu غير موجودة');
+      return;
+    }
 
     // Show context menu on right click
     chatMessages.addEventListener('contextmenu', (e) => {

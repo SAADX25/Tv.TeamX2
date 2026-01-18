@@ -8,6 +8,25 @@ const multer = require('multer');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 
+// ✅ فحص المتغيرات البيئية الضرورية
+console.log('📝 فحص المتغيرات البيئية...');
+
+if (!process.env.JWT_SECRET) {
+  console.error('❌ خطأ: JWT_SECRET غير موجود في ملف .env');
+  console.error('⚠️  يرجى إضافة JWT_SECRET إلى ملف .env');
+  process.exit(1);
+}
+
+if (!process.env.MONGODB_URI) {
+  console.error('❌ خطأ: MONGODB_URI غير موجود في ملف .env');
+  console.error('⚠️  يرجى إضافة MONGODB_URI إلى ملف .env');
+  process.exit(1);
+}
+
+console.log('✅ JWT_SECRET موجود');
+console.log('✅ MONGODB_URI موجود:', process.env.MONGODB_URI);
+console.log('✅ جميع المتغيرات البيئية متوفرة');
+
 const authRoutes = require('./routes/auth');
 const messagesRoutes = require('./routes/messages');
 const channelsRoutes = require('./routes/channels');
@@ -32,7 +51,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // File upload configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    // استخدام مسار مطلق بدلاً من مسار نسبي
+    cb(null, path.join(__dirname, 'uploads'));
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -89,9 +109,12 @@ app.get('/', (req, res) => {
 });
 
 // Handle SPA routing - return index.html for all non-API routes
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
   if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
+  } else {
+    // السماح للـ error handler بمعالجة 404
+    next();
   }
 });
 

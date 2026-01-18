@@ -9,8 +9,12 @@ const socketModule = {
       return;
     }
 
+    // استخدام نفس الدومين من API_URL (إزالة /api من النهاية)
+    const socketUrl = API_URL.replace(/\/api\/?$/, '');
+    console.log('🔌 الاتصال بـ Socket.IO على:', socketUrl);
+
     // Connect to socket server
-    this.socket = io('https://laughing-palm-tree-5w7pvxqjx59fppr-3000.app.github.dev/', {
+    this.socket = io(socketUrl, {
       auth: {
         token: auth.token
       }
