@@ -113,8 +113,8 @@ app.get('*', (req, res, next) => {
   if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
   } else {
-    // السماح للـ error handler بمعالجة 404
-    next();
+    // إرجاع 404 للـ API routes غير الموجودة
+    res.status(404).json({ error: 'المسار غير موجود' });
   }
 });
 

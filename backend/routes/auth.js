@@ -14,8 +14,7 @@ router.post('/register', async (req, res) => {
     console.log('📝 البيانات المستلمة:', {
       username: username || 'غير موجود',
       email: email || 'غير موجود',
-      hasPassword: !!password,
-      passwordLength: password ? password.length : 0
+      hasPassword: !!password
     });
 
     // Validation - التحقق من الحقول المطلوبة
@@ -95,20 +94,6 @@ router.post('/register', async (req, res) => {
     }
 
     console.log('✅ لا يوجد مستخدم بنفس البيانات');
-
-    // التحقق من وجود JWT_SECRET
-    if (!process.env.JWT_SECRET) {
-      console.error('❌ JWT_SECRET غير موجود');
-      return res.status(500).json({ 
-        error: 'خطأ في إعدادات السيرفر',
-        details: {
-          type: 'JWT_SECRET_MISSING',
-          message: 'JWT_SECRET غير موجود في إعدادات السيرفر'
-        }
-      });
-    }
-
-    console.log('✅ JWT_SECRET موجود');
 
     // Create user
     console.log('📝 إنشاء المستخدم الجديد...');
@@ -288,18 +273,6 @@ router.post('/login', async (req, res) => {
     }
 
     console.log('✅ كلمة المرور صحيحة');
-
-    // التحقق من وجود JWT_SECRET
-    if (!process.env.JWT_SECRET) {
-      console.error('❌ JWT_SECRET غير موجود');
-      return res.status(500).json({ 
-        error: 'خطأ في إعدادات السيرفر',
-        details: {
-          type: 'JWT_SECRET_MISSING',
-          message: 'JWT_SECRET غير موجود في إعدادات السيرفر'
-        }
-      });
-    }
 
     // Generate token
     console.log('🔑 إنشاء التوكن...');
