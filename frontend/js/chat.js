@@ -14,6 +14,11 @@ const chat = {
     this.setupMobileMenu();
     this.loadChannel('696c89cd48e7684bf3ddb21f');
 
+    const clearBtn = document.getElementById('clearMessagesBtn');
+    if (clearBtn) {
+        clearBtn.onclick = () => this.clearMessages();
+    }
+
     if (window.socketModule && socketModule.socket) {
         socketModule.socket.on('all-messages-deleted', () => {
             const container = document.getElementById('chatMessages');
@@ -593,6 +598,19 @@ const chat = {
   clearTypingUser(username) {
     this.typingUsers.delete(username);
     this.showTyping({ username, isTyping: false });
+  },
+
+  clearMessages() {
+    if (!confirm('هل تريد مسح الرسائل من الشاشة؟ (سيتم مسحها عندك فقط)')) return;
+    const container = document.getElementById('chatMessages');
+    if (container) {
+      const msgs = container.querySelectorAll('.message');
+      msgs.forEach(m => m.remove());
+      const welcome = container.querySelector('.welcome-message');
+      if(welcome) welcome.style.display = 'block';
+    }
+    this.messages = [];
+    utils.showToast('تم مسح الرسائل محلياً', 'info');
   }
 };
 
