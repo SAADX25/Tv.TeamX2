@@ -98,7 +98,20 @@
 
         <div class="form-group">
           <label>رابط الصورة الشخصية (URL)</label>
-          <input type="text" id="settingsAvatar" placeholder="https://...">
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="settingsAvatar" placeholder="https://..." style="flex: 1;">
+            <button type="button" class="btn-primary" id="uploadAvatarBtn" style="width: auto; padding: 10px;">
+              <i class="fas fa-upload"></i>
+            </button>
+            <input type="file" id="avatarFileInput" style="display: none;" accept="image/*">
+          </div>
+        </div>
+        
+        <div class="form-group" id="adminTools" style="display: none;">
+          <label style="color: var(--danger);">أدوات الإدارة</label>
+          <button type="button" class="btn-primary" id="deleteAllMsgsBtn" style="background: var(--danger); margin-top: 5px;">
+            <i class="fas fa-trash-alt"></i> حذف جميع الرسائل
+          </button>
         </div>
         
         <div class="modal-actions" style="display: flex; gap: 10px; margin-top: 20px;">
@@ -194,6 +207,9 @@
 
     <main class="chat-area">
       <header class="chat-header">
+        <button class="header-btn mobile-only" id="mobileMenuBtn" style="display: none;">
+          <i class="fas fa-bars"></i>
+        </button>
         <div class="channel-info">
           <i class="fas fa-hashtag channel-icon"></i>
           <h2 id="currentChannelName">عام</h2>
@@ -228,6 +244,9 @@
       <div class="message-input-container">
         <button class="input-btn" id="attachBtn" title="إرفاق ملف">
           <i class="fas fa-plus"></i>
+        </button>
+        <button class="input-btn" id="voiceBtn" title="رسالة صوتية">
+          <i class="fas fa-microphone"></i>
         </button>
         <div class="message-input-wrapper">
           <textarea id="messageInput" placeholder="أرسل رسالة إلى #عام" rows="1"></textarea>

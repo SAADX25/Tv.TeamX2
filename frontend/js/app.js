@@ -78,8 +78,62 @@ const app = {
         });
     }
 
-    // ✅ حفظ التغييرات (إرسال اللون للسيرفر)
     if (settingsForm) {
+        // Avatar upload
+        const uploadAvatarBtn = document.getElementById('uploadAvatarBtn');
+        const avatarInput = document.getElementById('avatarFileInput');
+        const avatarUrlInput = document.getElementById('settingsAvatar');
+        
+        if (uploadAvatarBtn && avatarInput) {
+            uploadAvatarBtn.onclick = () => avatarInput.click();
+            avatarInput.onchange = async () => {
+                if (avatarInput.files.length > 0) {
+                    const formData = new FormData();
+                    formData.append('file', avatarInput.files[0]);
+                    try {
+                        const res = await fetch(`${API_URL}/upload`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${auth.token}` },
+                            body: formData
+                        });
+                        const data = await res.json();
+                        if (data.url) {
+                            avatarUrlInput.value = data.url;
+                            utils.showToast('تم رفع الصورة', 'success');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        utils.showToast('فشل رفع الصورة', 'error');
+                    }
+                }
+            };
+        }
+
+        // Admin tool: Delete all messages
+        const deleteAllBtn = document.getElementById('deleteAllMsgsBtn');
+        if (deleteAllBtn) {
+            deleteAllBtn.onclick = async () => {
+                if (confirm('هل أنت متأكد من حذف جميع الرسائل؟ لا يمكن التراجع!')) {
+                    try {
+                        await fetch(`${API_URL}/messages/all`, {
+                            method: 'DELETE',
+                            headers: auth.getAuthHeader()
+                        });
+                        utils.showToast('تم مسح جميع الرسائل', 'success');
+                    } catch (err) {
+                        console.error(err);
+                        utils.showToast('فشل حذف الرسائل', 'error');
+                    }
+                }
+            };
+        }
+
+        // Show admin tools if owner
+        if (auth.user?.role === 'owner') {
+            const adminTools = document.getElementById('adminTools');
+            if (adminTools) adminTools.style.display = 'block';
+        }
+
         settingsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('settingsUsername').value;

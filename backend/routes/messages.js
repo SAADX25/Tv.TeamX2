@@ -67,6 +67,32 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+const ogs = require('open-graph-scraper');
+
+// Get link preview
+router.post('/link-preview', async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: 'URL is required' });
+
+    const options = { url };
+    const { result } = await ogs(options);
+    
+    if (result.success) {
+      res.json({
+        title: result.ogTitle || result.twitterTitle || '',
+        description: result.ogDescription || result.twitterDescription || '',
+        image: result.ogImage?.url || result.ogImage?.[0]?.url || '',
+        url: result.ogUrl || url
+      });
+    } else {
+      res.status(404).json({ error: 'No metadata found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch metadata' });
+  }
+});
+
 // إضافة/إزالة reaction
 router.post('/:id/reactions', auth, async (req, res) => {
   try {
@@ -111,6 +137,28 @@ router.post('/:id/reactions', auth, async (req, res) => {
   } catch (error) {
     console.error('Reaction error:', error);
     res.status(500).json({ error: 'خطأ في التفاعل' });
+  }
+});
+
+// حذف جميع الرسائل (للمالك فقط)
+router.delete('/all', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (user.role !== 'owner') {
+      return res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
+    }
+
+    await Message.deleteMany({});
+    
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('all-messages-deleted');
+    }
+
+    res.json({ message: 'تم حذف جميع الرسائل بنجاح' });
+  } catch (error) {
+    console.error('Delete all messages error:', error);
+    res.status(500).json({ error: 'خطأ في حذف الرسائل' });
   }
 });
 

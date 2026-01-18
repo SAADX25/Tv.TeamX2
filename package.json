@@ -1,0 +1,15 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "تطبيق محادثة شبيه بـ Discord مع دعم الرسائل الفورية ورفع الملفات.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "open-graph-scraper": "^6.11.0"
+  }
+}

@@ -10,9 +10,23 @@ const chat = {
     this.setupEmojiPicker();
     this.setupContextMenu();
     this.setupReactions();
+    this.setupVoiceNotes();
+    this.setupMobileMenu();
     this.loadChannel('696c89cd48e7684bf3ddb21f');
 
     if (window.socketModule && socketModule.socket) {
+        socketModule.socket.on('all-messages-deleted', () => {
+            const container = document.getElementById('chatMessages');
+            if (container) {
+              const msgs = container.querySelectorAll('.message');
+              msgs.forEach(m => m.remove());
+              const welcome = container.querySelector('.welcome-message');
+              if(welcome) welcome.style.display = 'block';
+            }
+            this.messages = [];
+            utils.showToast('تم مسح جميع الرسائل من قبل المسؤول', 'info');
+        });
+
         socketModule.socket.on('message-deleted', ({ messageId }) => {
             const el = document.querySelector(`.message[data-message-id="${messageId}"]`);
             if (el) el.remove();
@@ -305,6 +319,61 @@ const chat = {
     return parsed;
   },
 
+  setupMobileMenu() {
+    const menuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.querySelector('.channels-sidebar');
+    if (menuBtn && sidebar) {
+      menuBtn.onclick = () => sidebar.classList.toggle('mobile-active');
+    }
+  },
+
+  setupVoiceNotes() {
+    const voiceBtn = document.getElementById('voiceBtn');
+    if (!voiceBtn) return;
+
+    let mediaRecorder;
+    let audioChunks = [];
+
+    voiceBtn.onclick = async () => {
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const formData = new FormData();
+            formData.append('file', audioBlob, 'voice-note.webm');
+
+            const res = await fetch(`${API_URL}/upload`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${auth.token}` },
+              body: formData
+            });
+            const data = await res.json();
+            if (data.url) {
+              socketModule.sendMessage('', [data.url]);
+            }
+            stream.getTracks().forEach(track => track.stop());
+          };
+
+          mediaRecorder.start();
+          voiceBtn.classList.add('recording');
+          utils.showToast('جاري التسجيل...', 'info');
+        } catch (err) {
+          console.error('Voice record error:', err);
+          utils.showToast('فشل الوصول للميكروفون', 'error');
+        }
+      } else {
+        mediaRecorder.stop();
+        voiceBtn.classList.remove('recording');
+        utils.showToast('تم إرسال الرسالة الصوتية', 'success');
+      }
+    };
+  },
+
   createMessageElement(msg) {
     const div = document.createElement('div');
     div.className = 'message';
@@ -338,21 +407,11 @@ const chat = {
     }
 
     const parsedContent = this.parseMarkdown(msg.content);
-    const status = msg.author?.status || 'offline';
-    const statusDot = `<span class="status-dot ${status}"></span>`;
     
-    let replyHtml = '';
-    if (msg.replyTo) {
-      const replyAuthor = msg.replyTo.author?.username || 'User';
-      const replyContent = msg.replyTo.content?.substring(0, 60) || '';
-      replyHtml = `
-        <div class="message-reference" onclick="chat.scrollToMessage('${msg.replyTo._id || msg.replyTo.id}')">
-          <i class="fas fa-reply"></i>
-          <span class="ref-author">${replyAuthor}</span>
-          <span class="ref-content">${replyContent}${msg.replyTo.content?.length > 60 ? '...' : ''}</span>
-        </div>
-      `;
-    }
+    // Extract links for preview
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const urls = msg.content.match(urlRegex);
+    let linkPreviewsHtml = '<div class="link-previews-container"></div>';
 
     div.innerHTML = `
       <div class="avatar-container">
@@ -366,11 +425,16 @@ const chat = {
         </div>
         <div class="message-text">${parsedContent}</div>
         ${attachmentsHtml}
+        ${linkPreviewsHtml}
         <div class="message-reactions" data-message-id="${msg._id || msg.id}">
           <button class="add-reaction-btn" title="Add Reaction">+</button>
         </div>
       </div>
     `;
+
+    if (urls) {
+      this.fetchLinkPreviews(div, urls);
+    }
     
     this.renderReactions(div, msg.reactions || []);
     
@@ -425,6 +489,37 @@ const chat = {
     
     input.value = '';
     input.style.height = 'auto';
+  },
+
+  async fetchLinkPreviews(messageEl, urls) {
+    const container = messageEl.querySelector('.link-previews-container');
+    if (!container) return;
+
+    for (const url of urls.slice(0, 3)) { // Limit to 3 previews
+      try {
+        const res = await fetch(`${API_URL}/messages/link-preview`, {
+          method: 'POST',
+          headers: auth.getAuthHeader(),
+          body: JSON.stringify({ url })
+        });
+        const data = await res.json();
+        if (data.title) {
+          const preview = document.createElement('div');
+          preview.className = 'link-preview-card';
+          preview.innerHTML = `
+            ${data.image ? `<img src="${data.image}" class="link-preview-image">` : ''}
+            <div class="link-preview-content">
+              <a href="${data.url}" target="_blank" class="link-preview-title">${data.title}</a>
+              ${data.description ? `<p class="link-preview-desc">${data.description}</p>` : ''}
+            </div>
+          `;
+          container.appendChild(preview);
+          this.scrollToBottom();
+        }
+      } catch (err) {
+        console.error('Link preview error:', err);
+      }
+    }
   },
 
   receiveMessage(msg) {

@@ -281,7 +281,65 @@ body {
   height: 40px;
 }
 
-/* Mobile responsiveness */
+.mobile-only {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block !important;
+  }
+}
+
+#voiceBtn.recording {
+  color: var(--danger);
+  animation: pulse 1.5s infinite;
+}
+
+.link-preview-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 10px;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease;
+}
+
+.link-preview-card:hover {
+  transform: scale(1.02);
+  border-color: var(--brand-primary);
+}
+
+.link-preview-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.link-preview-content {
+  padding: 12px;
+}
+
+.link-preview-title {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+  display: block;
+  text-decoration: none;
+}
+
+.link-preview-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 @media (max-width: 768px) {
   .app {
     grid-template-columns: 1fr;
