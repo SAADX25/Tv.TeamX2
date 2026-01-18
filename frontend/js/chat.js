@@ -374,23 +374,40 @@ const chat = {
     if(form) form.onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('channelIdInput').value;
-      const name = document.getElementById('channelNameInput').value;
+      const name = document.getElementById('channelNameInput').value.trim();
       const type = document.getElementById('channelTypeInput').value;
       const serverId = localStorage.getItem('currentServerId');
+
+      if (!name) {
+        utils.showToast('يرجى إدخال اسم القناة', 'error');
+        return;
+      }
+
+      if (!serverId) {
+        utils.showToast('لم يتم تحديد السيرفر، يرجى تحديث الصفحة', 'error');
+        return;
+      }
 
       try {
         const method = id ? 'PUT' : 'POST';
         const url = id ? `${API_URL}/channels/${id}` : `${API_URL}/channels`;
-        await fetch(url, {
+        const response = await fetch(url, {
           method,
           headers: auth.getAuthHeader(),
           body: JSON.stringify({ name, type, serverId })
         });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'فشل في العملية');
+        }
+
         modal.classList.remove('active');
-        // ✅ تحديث القائمة فوراً بعد الإنشاء أو التعديل
+        utils.showToast(id ? 'تم تعديل القناة بنجاح' : 'تم إنشاء القناة بنجاح', 'success');
         this.loadChannels();
       } catch (error) {
-        utils.showToast('خطأ في العملية', 'error');
+        console.error('Channel operation error:', error);
+        utils.showToast(error.message || 'خطأ في العملية', 'error');
       }
     };
 
@@ -398,13 +415,20 @@ const chat = {
       const id = document.getElementById('channelIdInput').value;
       if (!confirm('هل أنت متأكد من حذف هذه القناة؟')) return;
       try {
-        await fetch(`${API_URL}/channels/${id}`, {
+        const response = await fetch(`${API_URL}/channels/${id}`, {
           method: 'DELETE',
           headers: auth.getAuthHeader()
         });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'فشل في الحذف');
+        }
         modal.classList.remove('active');
+        utils.showToast('تم حذف القناة بنجاح', 'success');
+        this.loadChannels();
       } catch (error) {
-        utils.showToast('خطأ في الحذف', 'error');
+        console.error('Delete channel error:', error);
+        utils.showToast(error.message || 'خطأ في الحذف', 'error');
       }
     };
   },
