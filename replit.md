@@ -53,7 +53,32 @@ The application runs as a single Node.js server that serves both the API and sta
 - `typing` - Typing indicator
 - `user-status` - Online/offline status
 
+## Features
+- **Real-time Typing Indicators**: Shows "[User] is typing..." with support for multiple users
+- **Markdown Support**: Bold, italic, code, blockquotes rendered in messages
+- **Code Syntax Highlighting**: Prism.js for JavaScript, Python, CSS, HTML, Bash, JSON
+- **Message Reactions**: Emoji picker with toggle functionality (click to add/remove)
+- **Reply System**: Quote and reply to specific messages with context navigation
+- **Role/Badge System**: Visual badges for Owner (👑), Admin (🛡️), VIP (💎)
+- **Online/Offline Status**: Color-coded dots (green=online, gray=offline, yellow=away)
+- **Animated Usernames**: RGB effects (rainbow, gold, red glow, blue neon, matrix green)
+- **RTL Arabic Interface**: Full right-to-left layout support
+
+## API Endpoints
+### Messages
+- `POST /api/messages/:id/reactions` - Toggle emoji reaction on message
+- `POST /api/messages/reply` - Reply to a message with quoted context
+
 ## Recent Changes
+- January 18, 2026: Enhanced chat features
+  - Added typing indicators with real-time Socket.IO broadcasting
+  - Implemented Markdown parsing with Prism.js syntax highlighting
+  - Built message reactions system with emoji picker and toggle
+  - Added reply system with quoted context and navigation
+  - Implemented role badges (Owner, Admin, VIP) on user profiles
+  - Added online/offline status dots with real-time updates
+  - Fixed reaction toggle ObjectId vs string comparison bug
+  - Added autocomplete attributes to form inputs for accessibility
 - January 18, 2026: Initial Replit setup
   - Configured server to run on port 5000 with 0.0.0.0 binding
   - Updated API_URL to use dynamic origin for Replit compatibility
