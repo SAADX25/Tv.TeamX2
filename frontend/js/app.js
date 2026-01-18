@@ -91,6 +91,7 @@ const app = {
                 if (avatarInput.files.length > 0) {
                     const formData = new FormData();
                     formData.append('file', avatarInput.files[0]);
+                    utils.showToast('جاري الرفع...', 'info');
                     try {
                         const res = await fetch(`${API_URL}/upload`, {
                             method: 'POST',
@@ -100,7 +101,10 @@ const app = {
                         const data = await res.json();
                         if (data.url) {
                             avatarUrlInput.value = data.url;
-                            utils.showToast('تم رفع الصورة', 'success');
+                            // Update preview immediately if possible
+                            const previewAvatar = document.querySelector('#settingsModal .member-avatar');
+                            if (previewAvatar) previewAvatar.src = utils.getAvatarUrl(data.url);
+                            utils.showToast('تم رفع الصورة بنجاح', 'success');
                         }
                     } catch (err) {
                         console.error(err);
