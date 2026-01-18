@@ -38,23 +38,54 @@ router.post('/', auth, async (req, res) => {
       return res.status(404).json({ error: 'السيرفر غير موجود' });
     }
 
-    if (server.owner.toString() !== req.userId.toString()) {
-      return res.status(403).json({ error: 'غير مصرح بإنشاء قنوات في هذا السيرفر' });
-    }
-
     const channel = new Channel({
       name,
       type: type || 'text',
       server: serverId,
-      category: category || 'general',
+      category: category || (type === 'voice' ? 'voice' : 'general'),
       members: [req.userId]
     });
 
     await channel.save();
+    
+    const io = req.app.get('io');
+    io.emit('channel-created', channel);
+
     res.status(201).json({ channel });
   } catch (error) {
     console.error('Create channel error:', error);
     res.status(500).json({ error: 'خطأ في إنشاء القناة' });
+  }
+});
+
+// Rename a channel
+router.put('/:id', auth, async (req, res) => {
+  try {
+    const { name } = req.body;
+    const channel = await Channel.findByIdAndUpdate(req.params.id, { name }, { new: true });
+    if (!channel) return res.status(404).json({ error: 'القناة غير موجودة' });
+    
+    const io = req.app.get('io');
+    io.emit('channel-updated', channel);
+    
+    res.json({ channel });
+  } catch (error) {
+    res.status(500).json({ error: 'خطأ في تعديل القناة' });
+  }
+});
+
+// Delete a channel
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const channel = await Channel.findByIdAndDelete(req.params.id);
+    if (!channel) return res.status(404).json({ error: 'القناة غير موجودة' });
+    
+    const io = req.app.get('io');
+    io.emit('channel-deleted', { channelId: req.params.id });
+    
+    res.json({ message: 'تم حذف القناة' });
+  } catch (error) {
+    res.status(500).json({ error: 'خطأ في حذف القناة' });
   }
 });
 

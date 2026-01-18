@@ -12,6 +12,10 @@ const chat = {
     this.setupReactions();
     this.setupVoiceNotes();
     this.setupMobileMenu();
+    this.setupChannelManagement();
+    this.loadChannels();
+    
+    // Default channel
     this.loadChannel('696c89cd48e7684bf3ddb21f');
 
     const clearBtn = document.getElementById('clearMessagesBtn');
@@ -20,6 +24,12 @@ const chat = {
     }
 
     if (window.socketModule && socketModule.socket) {
+        socketModule.socket.on('voice-user-joined', (data) => this.handleVoiceUserJoined(data));
+        socketModule.socket.on('voice-user-left', (data) => this.handleVoiceUserLeft(data));
+        socketModule.socket.on('channel-created', () => this.loadChannels());
+        socketModule.socket.on('channel-updated', () => this.loadChannels());
+        socketModule.socket.on('channel-deleted', () => this.loadChannels());
+        
         socketModule.socket.on('all-messages-deleted-in-channel', ({ channelId }) => {
             if (this.currentChannel === channelId) {
                 const container = document.getElementById('chatMessages');
@@ -249,9 +259,170 @@ const chat = {
     }
   },
 
+  async loadChannels() {
+    try {
+      const serverId = '65a8e3f9e4b0a1b2c3d4e5f6'; 
+      const res = await fetch(`${API_URL}/channels/server/${serverId}`, { headers: auth.getAuthHeader() });
+      const data = await res.json();
+      const channels = data.channels || [];
+      this.renderChannels(channels);
+    } catch (error) {
+      console.error('Load channels error:', error);
+    }
+  },
+
+  renderChannels(channels) {
+    const textList = document.getElementById('textChannelsList');
+    const voiceList = document.getElementById('voiceChannelsList');
+    if (!textList || !voiceList) return;
+
+    textList.innerHTML = '';
+    voiceList.innerHTML = '';
+
+    channels.forEach(ch => {
+      const div = document.createElement('div');
+      div.className = `channel ${this.currentChannel === ch._id ? 'active' : ''}`;
+      div.dataset.channelId = ch._id;
+      div.dataset.type = ch.type;
+      
+      const icon = ch.type === 'voice' ? 'fa-volume-up' : 'fa-hashtag';
+      div.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <span>${ch.name}</span>
+        <button class="channel-settings-btn" title="إعدادات القناة">
+          <i class="fas fa-cog"></i>
+        </button>
+      `;
+
+      if (ch.type === 'voice') {
+        const usersDiv = document.createElement('div');
+        usersDiv.className = 'voice-users';
+        usersDiv.id = `voice-users-${ch._id}`;
+        voiceList.appendChild(div);
+        voiceList.appendChild(usersDiv);
+      } else {
+        textList.appendChild(div);
+      }
+
+      div.onclick = (e) => {
+        if (e.target.closest('.channel-settings-btn')) return;
+        if (ch.type === 'voice') {
+          socketModule.socket.emit('join-voice', { channelId: ch._id });
+        } else {
+          this.loadChannel(ch._id);
+          document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
+          div.classList.add('active');
+        }
+      };
+
+      div.querySelector('.channel-settings-btn').onclick = (e) => {
+        e.stopPropagation();
+        this.showChannelModal(ch);
+      };
+    });
+  },
+
+  setupChannelManagement() {
+    const modal = document.getElementById('channelModal');
+    const form = document.getElementById('channelForm');
+    const closeBtn = document.getElementById('closeChannelModal');
+    const addBtns = document.querySelectorAll('.add-channel-btn');
+    const deleteBtn = document.getElementById('deleteChannelBtn');
+
+    addBtns.forEach(btn => {
+      btn.onclick = () => {
+        this.showChannelModal({ type: btn.dataset.type });
+      };
+    });
+
+    if(closeBtn) closeBtn.onclick = () => modal.classList.remove('active');
+    
+    if(form) form.onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('channelIdInput').value;
+      const name = document.getElementById('channelNameInput').value;
+      const type = document.getElementById('channelTypeInput').value;
+      const serverId = '65a8e3f9e4b0a1b2c3d4e5f6';
+
+      try {
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${API_URL}/channels/${id}` : `${API_URL}/channels`;
+        await fetch(url, {
+          method,
+          headers: auth.getAuthHeader(),
+          body: JSON.stringify({ name, type, serverId })
+        });
+        modal.classList.remove('active');
+      } catch (error) {
+        utils.showToast('خطأ في العملية', 'error');
+      }
+    };
+
+    if(deleteBtn) deleteBtn.onclick = async () => {
+      const id = document.getElementById('channelIdInput').value;
+      if (!confirm('هل أنت متأكد من حذف هذه القناة؟')) return;
+      try {
+        await fetch(`${API_URL}/channels/${id}`, {
+          method: 'DELETE',
+          headers: auth.getAuthHeader()
+        });
+        modal.classList.remove('active');
+      } catch (error) {
+        utils.showToast('خطأ في الحذف', 'error');
+      }
+    };
+  },
+
+  showChannelModal(ch = {}) {
+    const modal = document.getElementById('channelModal');
+    const title = document.getElementById('channelModalTitle');
+    const nameInput = document.getElementById('channelNameInput');
+    const idInput = document.getElementById('channelIdInput');
+    const typeInput = document.getElementById('channelTypeInput');
+    const submitBtn = document.getElementById('channelSubmitBtn');
+    const deleteBtn = document.getElementById('deleteChannelBtn');
+
+    if(!modal) return;
+
+    idInput.value = ch._id || '';
+    nameInput.value = ch.name || '';
+    typeInput.value = ch.type || 'text';
+    
+    title.textContent = ch._id ? 'تعديل القناة' : `إنشاء قناة ${ch.type === 'voice' ? 'صوتية' : 'نصية'} جديدة`;
+    submitBtn.innerHTML = ch._id ? '<i class="fas fa-save"></i> حفظ التغييرات' : '<i class="fas fa-plus-circle"></i> إنشاء القناة';
+    deleteBtn.style.display = ch._id ? 'block' : 'none';
+
+    modal.classList.add('active');
+    nameInput.focus();
+  },
+
+  handleVoiceUserJoined({ channelId, user }) {
+    const container = document.getElementById(`voice-users-${channelId}`);
+    if (!container) return;
+    
+    const existing = container.querySelector(`[data-user-id="${user.id}"]`);
+    if (existing) existing.remove();
+
+    const div = document.createElement('div');
+    div.className = 'voice-user';
+    div.dataset.userId = user.id;
+    div.innerHTML = `
+      <img src="${utils.getAvatarUrl(user.avatar)}" onerror="this.src='assets/default-avatar.svg'">
+      <span>${user.username}</span>
+    `;
+    container.appendChild(div);
+  },
+
+  handleVoiceUserLeft({ channelId, userId }) {
+    const container = document.getElementById(`voice-users-${channelId}`);
+    if (!container) return;
+    const el = container.querySelector(`[data-user-id="${userId}"]`);
+    if (el) el.remove();
+  },
+
   async deleteMessage(id) {
-      if(!confirm('حذف؟')) return;
-      await fetch(`${API_URL}/messages/${id}`, { method: 'DELETE', headers: auth.getAuthHeader() });
+    if(!confirm('حذف؟')) return;
+    await fetch(`${API_URL}/messages/${id}`, { method: 'DELETE', headers: auth.getAuthHeader() });
   },
 
   setupEmojiPicker() {
@@ -267,9 +438,9 @@ const chat = {
     const emojiData = {
       smileys: ["😀","😂","😍","🤣","😊","😇","🙂","😉","😌","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗","🤔","🤭","🤫","🤥","😶","😐","😑","😬","🙄","😯","😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐","🥴","🤢","🤮","🤧"],
       animals: ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐽","🐸","🐵","🙈","🙉","🙊","🐒","🐔","🐧","🐦","🐤","🐣","🐥","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐌","🐞","🐜","🦟","🦗","🕷","🕸","🦂","🐢","🐍","🦎","🦖","🦕","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟","🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦍","🐘","🦏","🦛","🐪","🐫","🦒","🦘","🐃","🐂","🐄","🐎","🐖","🐏","🐑","🦙","🐐","🦌","🐕","🐩","🐈","🐓","🦃","🦚","🦜","🦢","🕊","🐇","🦝","🦡","🦦","🦥","🐿","🐀","🐁","🐾","🐉","🐲","🌵","🎄","🌲","🌳","🌴","🌱","🌿","☘️","🍀","🎍","🎋","🍃","🍂","🍁","🍄","🐚","🌾","💐","🌷","🌹","🥀","🌺","🌸","🌼","🌻","🌞","🌝","🌛","🌜","🌚","🌕","🌖","🌗","🌘","🌑","🌒","🌓","🌔","🌙","🌎","🌍","🌏","🪐","💫","⭐️","🌟","✨","⚡️","☄️","💥","🔥","🌪","🌈","☀️","🌤","⛅️","🌥","☁️","🌦","🌧","⛈","🌩","🌨","❄️","☃️","⛄️","🌬","💨","💧","💦","☔️","☂️","🌊","🌫"],
-      food: ["🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥬","🥒","🌶","🌽","🥕","🧄","🧅","🥔","🍠","🥐","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🧈","🥞"," waffle","🧇","🥓","🥩","🍗","🍖","🦴","🌭","🍔","🍟","🍕","🥪","🥙","🧆","🌮","🌯","🥗","🥘","🍝","🍜","🍲","🍛","🍣","🍱","🥟","🦪","🍤","🍙","🍚","🍘","🍥","🥠","🥮","🍢","🍡","🍧","🍨","🍦","🥧","🧁","🍰","🎂","🍮","🍭","🍬","🍫","🍿","🍩","🍪","🌰","🥜","🍯","🥛","☕️","🍵","🧉","🍶","🥤","🧃","🥂","🍷","🥃","🍸","🍹","🍺","🍻","🧉","🧊","🥢","🍽","🍴","🥄","🏺"],
-      activities: ["⚽️","🏀","🏈","⚾️","🥎","🎾","🏐","🏉","🎱","🏓","🏸","🥅","🏒","🏑","🏏","⛳️","🏹","🎣","🥊","🥋","🎽","⛸","🥌","🛷","🛹","🎿","⛷","🏂","🏋️‍♀️","🏋️‍♂️","🤼‍♀️","🤼‍♂️","🤸‍♀️","🤸‍♂️","⛹️‍♀️","⛹️‍♂️","🤺","🤾‍♀️","🤾‍♂️","🏌️‍♀️","🏌️‍♂️","🏇","🧘‍♀️","🧘‍♂️","🏄‍♀️","🏄‍♂️","🏊‍♀️","🏊‍♂️","🤽‍♀️","🤽‍♂️","🚣‍♀️","🚣‍♂️","🧗‍♀️","🧗‍♂️","🚵‍♀️","🚵‍♂️","🚴‍♀️","🚴‍♂️","🏆","🥇","🥈","🥉","🏅","🎖","🏵","🎫","🎟","🎭","🎨","🖼","🧵","🧶","🎼","🎵","🎶","🎙","🎚","🎛","🎤","🎧","📻","🎷","🎸","🎹","🎺","🎻","🥁","🎮","🕹","🎰","🎲","🧩","🎯"],
-      objects: ["⌚️","📱","📲","💻","⌨️","🖱","🖲","🕹","💽","💾","💿","📀","📼","📷","📸","📹","🎥","📽","🎞","📞","☎️","📟","📠","📺","📻","🎙","🎚","🎛","🧭","⏱","⏲","⏰","🕰","⌛️","⏳","📡","🔋","🔌","💡","🔦","🕯","🪔","🧯","🛢","💸","💵","💴","💶","💷","💰","💳","💎","⚖️","🧰","🔧","🔨","⚒","🛠","⛏","🔩","⚙️","🧱","⛓","🧲","🔫","💣","🧨","🔪","🗡","⚔️","🛡","🚬","⚰️","⚱️","🏺","🔮","📿","🧿","💈","⚗️","🔭","🔬","🕳","💊","💉","🩸","🧬","🦠","🌡","🧹","🧺","🧻","🧼","🧽","🧴","🛎","🔑","🗝","🚪","🪑","🛋","🛏","🛌","🧸","🖼","🛍","🛒","🎁","🎈","🎏","🎀","🎊","🎉","🎎","🏮","🎐","🧧","✉️","📩","📨","📧","💌","📥","📤","📦","🏷","📪","📫","📬","📭","📮","📯","📜","📃","📄","📑","📊","📈","📉","🗒","🗓","📆","📅","🗑","📇","🗃","🗳","🗄","📋","📁","📂","🗂","🗞","📰","📓","📔","📒","📕","📗","📘","📙","📚","📖","🔖","🧷","🔗","📎","🖇","📐","📏","📌","📍","✂️","🖊","🖋","✒️","🖌","🖍","📝","✏️","🔍","🔎","🔏","🔐","🔒","🔓"]
+      food: ["🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥬","🥒","🌶","🌽","🥕","🧄","🧅","🥔","🍠","🥐"," bagel","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🧈","🥞"," waffle","🧇","🥓","🥩","🍗","🍖","🦴","🌭","🍔","🍟","🍕","🥪","🥙","🧆"," taco","🌯"," salad","🥘"," spaghetti","🍝"," ramen","🍜"," stew","🍲"," curry","🍣"," bento"," dumpling"," oyster"," shrimp"," rice ball"," rice"," cracker"," fish cake"," fortune cookie"," mooncake"," oden"," dango"," shaved ice"," ice cream"," dessert"," pie"," cupcake"," cake"," birthday cake"," custard"," lollipop"," candy"," chocolate"," popcorn"," donut"," cookie"," chestnut"," peanuts"," honey"," milk"," coffee"," tea"," sake"," beverage"," juice"," cocktail"," wine"," whiskey"," beer"," cheers"," ice"," chopsticks"," plate"," fork"," spoon","🏺"],
+      activities: ["⚽️","🏀","🏈","⚾️","🥎"," tennis","🎾"," volleyball","🏐"," rugby","🏉"," billiards","🎱"," table tennis","🏓"," badminton","🏸"," goal"," hockey"," hockey"," cricket"," golf"," archery"," fishing"," boxing","🥋"," running"," skate"," curling"," sled"," skateboard"," ski"," skier"," snowboarder"," weightlifter"," weightlifter"," wrestler"," wrestler"," gymnast"," gymnast"," basketballer"," basketballer"," fencer"," handballer"," handballer"," golfer"," golfer"," jockey"," yogi"," yogi"," surfer"," surfer"," swimmer"," swimmer"," water polo"," water polo"," rower"," rower"," climber"," climber"," mountain biker"," mountain biker"," cyclist"," cyclist"," trophy","🥇","🥈","🥉"," medal"," medal"," rosette","🎫"," ticket"," mask"," artist palette"," frame"," thread"," yarn","🎼"," note"," notes"," mic"," fader"," knob"," microphone"," headphones","📻"," saxophone"," guitar"," keyboard"," trumpet"," violin"," drum"," mobile"," mobile"," laptop"," keyboard"," mouse"," trackball"," joystick"," video game"," alien monster","🎯"," slot machine","🎲"," puzzle"," teddy bear"," spade"," mahjong"," hanafuda"," mask"],
+      objects: ["⌚️","📱","📲","💻","⌨️","🖱","🖲","🕹","💽","💾","💿","📀","📼","📷","📸","📹","🎥","📽","🎞","📞","☎️","📟","📠","📺","📻","🎙","🎚","🎛","🧭","⏱","⏲","⏰","🕰","⌛️","⏳","📡","🔋","🔌","💡","🔦","🕯","🪔","🧯","🛢","💸","💵","💴","💶","💷","💰","💳","💎","⚖️","🧰","🔧","🔨","⚒","🛠","⛏","🔩","⚙️","🧱","⛓","🧲","🔫","💣","🧨","🔪","🗡","⚔️","🛡","🚬","⚰️","⚱️","🏺","🔮","📿","🧿","💈","⚗️"," telescope"," microscope"," hole"," pill"," syringe"," drop of blood"," dna"," microbe"," thermometer"," broom"," basket"," roll of paper"," soap"," sponge"," lotion"," bell"," key"," old key"," door"," chair"," couch"," bed"," sleeping"," teddy bear"," frame"," shopping bags"," cart"," gift"," balloon"," carp streamer"," ribbon"," confetti ball"," party popper"," dolls"," paper lantern"," wind chime"," envelope"," letter"," incoming envelope"," e-mail"," love letter"," inbox"," outbox"," package"," label"," mailbox"," closed mailbox"," mailbox"," open mailbox"," postbox"," postal horn"," scroll"," page"," page"," bookmark tabs"," bar chart"," chart up"," chart down"," notepad"," spiral calendar"," tear-off calendar"," calendar"," wastebasket"," card index"," card index box"," ballot box"," file cabinet"," clipboard"," file folder"," open file folder"," index dividers"," newspaper"," newspaper"," notebook"," notebook"," ledger"," closed book"," green book"," blue book"," orange book"," books"," open book"," bookmark"," safety pin"," link"," paperclip"," paperclips"," ruler"," straight ruler"," pushpin"," round pushpin"," round pushpin"," scissors"," pen"," fountain pen"," pen"," paintbrush"," crayon"," memo"," pencil"," magnifying glass"," magnifying glass"," locked"," locked with pen"," lock"," unlock"]
     };
 
     const allEmojis = Object.values(emojiData).flat();
@@ -310,7 +481,6 @@ const chat = {
         renderEmojis(cat === 'all' ? allEmojis : emojiData[cat]);
         return;
       }
-      // Simple filter for the search demo
       const filtered = allEmojis.filter(emoji => emoji.includes(term));
       renderEmojis(filtered.length > 0 ? filtered : allEmojis);
     });
@@ -677,27 +847,25 @@ const chat = {
         if(welcome) welcome.style.display = 'block';
       }
       this.messages = [];
-      utils.showToast('تم مسح الرسائل محلياً', 'info');
-      return;
-    }
-
-    if (!confirm('هل تريد مسح الرسائل من القناة نهائياً للجميع؟')) return;
-    
-    try {
-      const response = await fetch(`${API_URL}/messages/channel/${this.currentChannel}`, {
-        method: 'DELETE',
-        headers: auth.getAuthHeader()
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'فشل مسح القناة');
+      utils.showToast('تم مسح الشاشة محلياً', 'info');
+    } else {
+      // Permanent clear for owner/admin
+      if (!confirm('⚠️ تحذير: هل تريد حذف جميع رسائل هذه القناة نهائياً من قاعدة البيانات؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+      try {
+        const res = await fetch(`${API_URL}/messages/channel/${this.currentChannel}`, {
+          method: 'DELETE',
+          headers: auth.getAuthHeader()
+        });
+        const data = await res.json();
+        if (data.success) {
+          utils.showToast('تم حذف جميع رسائل القناة بنجاح', 'success');
+        } else {
+          utils.showToast(data.error || 'فشل حذف الرسائل', 'error');
+        }
+      } catch (error) {
+        console.error('Clear messages error:', error);
+        utils.showToast('حدث خطأ أثناء محاولة حذف الرسائل', 'error');
       }
-      
-      utils.showToast('تم مسح القناة بنجاح للجميع', 'success');
-    } catch (error) {
-      console.error('Clear channel error:', error);
-      utils.showToast(error.message, 'error');
     }
   }
 };

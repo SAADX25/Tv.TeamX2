@@ -224,14 +224,39 @@ io.on('connection', (socket) => {
   // Join voice channel
   socket.on('join-voice', (data) => {
     const { channelId } = data;
-    socket.join(`voice-${channelId}`);
-    
     const user = connectedUsers.get(socket.id);
-    if (user) {
-      io.to(`voice-${channelId}`).emit('user-joined-voice', {
-        userId: user.userId,
-        username: user.username
+    
+    if (user && channelId) {
+      // Leave previous voice rooms
+      socket.rooms.forEach(room => {
+        if (room.startsWith('voice-')) {
+          socket.leave(room);
+          const oldChanId = room.replace('voice-', '');
+          io.emit('voice-user-left', { channelId: oldChanId, userId: user.userId });
+        }
       });
+
+      socket.join(`voice-${channelId}`);
+      io.emit('voice-user-joined', { 
+        channelId, 
+        user: { 
+          id: user.userId, 
+          username: user.username, 
+          avatar: user.avatar 
+        } 
+      });
+      
+      console.log(`🎤 ${user.username} انضم للقناة الصوتية: ${channelId}`);
+    }
+  });
+
+  // Leave voice channel explicitly
+  socket.on('leave-voice', (data) => {
+    const { channelId } = data;
+    const user = connectedUsers.get(socket.id);
+    if (user && channelId) {
+      socket.leave(`voice-${channelId}`);
+      io.emit('voice-user-left', { channelId, userId: user.userId });
     }
   });
 

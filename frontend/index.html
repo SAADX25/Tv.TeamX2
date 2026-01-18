@@ -141,37 +141,33 @@
       </div>
       
       <div class="channels-list" id="channelsList">
-        <div class="channel-category">
+        <div class="channel-category" data-category="general">
           <div class="category-header">
-            <i class="fas fa-chevron-down"></i>
-            <span>قنوات نصية</span>
+            <div class="category-info">
+              <i class="fas fa-chevron-down"></i>
+              <span>قنوات نصية</span>
+            </div>
+            <button class="add-channel-btn" data-type="text" title="إضافة قناة نصية">
+              <i class="fas fa-plus"></i>
+            </button>
           </div>
-          <div class="category-channels">
-            <div class="channel active" data-channel-id="696c89cd48e7684bf3ddb21f" data-type="text">
-              <i class="fas fa-hashtag"></i>
-              <span>عام</span>
-            </div>
-            <div class="channel" data-channel-id="696c89cd48e7684bf3ddb221" data-type="text">
-              <i class="fas fa-hashtag"></i>
-              <span>عشوائي</span>
-            </div>
+          <div class="category-channels" id="textChannelsList">
+            <!-- Text channels will be rendered here -->
           </div>
         </div>
 
-        <div class="channel-category">
+        <div class="channel-category" data-category="voice">
           <div class="category-header">
-            <i class="fas fa-chevron-down"></i>
-            <span>قنوات صوتية</span>
+            <div class="category-info">
+              <i class="fas fa-chevron-down"></i>
+              <span>قنوات صوتية</span>
+            </div>
+            <button class="add-channel-btn" data-type="voice" title="إضافة قناة صوتية">
+              <i class="fas fa-plus"></i>
+            </button>
           </div>
-          <div class="category-channels">
-            <div class="channel" data-channel-id="696c89cd48e7684bf3ddb224" data-type="voice">
-              <i class="fas fa-volume-up"></i>
-              <span>صوتي 1</span>
-            </div>
-            <div class="channel" data-channel-id="696c89cd48e7684bf3ddb227" data-type="voice">
-              <i class="fas fa-volume-up"></i>
-              <span>صوتي 2</span>
-            </div>
+          <div class="category-channels" id="voiceChannelsList">
+            <!-- Voice channels will be rendered here -->
           </div>
         </div>
       </div>
@@ -328,6 +324,31 @@
         </div>
         <button class="btn-primary" id="uploadFileBtn">رفع</button>
       </div>
+    </div>
+  </div>
+
+  <div id="channelModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="channelModalTitle">إنشاء قناة جديدة</h3>
+        <button class="close-modal" id="closeChannelModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="channelForm">
+        <input type="hidden" id="channelIdInput">
+        <input type="hidden" id="channelTypeInput">
+        <div class="form-group">
+          <label>اسم القناة</label>
+          <input type="text" id="channelNameInput" placeholder="أدخل اسم القناة" required minlength="2">
+        </div>
+        <button type="submit" class="btn-primary" id="channelSubmitBtn">
+          <i class="fas fa-plus-circle"></i> إنشاء القناة
+        </button>
+        <button type="button" class="btn-primary" id="deleteChannelBtn" style="background: var(--danger); margin-top: 10px; display: none;">
+          <i class="fas fa-trash"></i> حذف القناة
+        </button>
+      </form>
     </div>
   </div>
 
