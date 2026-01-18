@@ -70,34 +70,36 @@ cp .env.example .env
 
 4. تعديل `.env` بالإعدادات المناسبة:
 ```
+# JWT Secret Key
+JWT_SECRET=teamx2_super_secret_jwt_key_2024_haddadhgcr_random_string_xyz789
+
+# MongoDB Atlas Connection String (لا مسافات!)
+MONGODB_URI=mongodb+srv://haddadhgcr_db_user:ZyHfb7h6i54rHF4k@cluster0.pjveu1y.mongodb.net/teamx2-chat?retryWrites=true&w=majority&appName=Cluster0
+
+# Server Port
 PORT=3000
-MONGODB_URI=mongodb://localhost:27017/teamx2-chat
-JWT_SECRET=your-secret-key-here
-NODE_ENV=development
 ```
 
 5. تشغيل السيرفر:
-```bash
-npm start
-# أو للتطوير
+GO ----- TERMINAL
+
+cd backend
+npm install
 npm run dev
-```
 
 ### Frontend
 
 1. افتح `frontend/index.html` في المتصفح مباشرة
    
-   أو استخدم خادم محلي:
-```bash
-cd frontend
-python -m http.server 8080
-# أو
-npx serve
-```
+ملاحظه تشغيل سيرفر لازم تغير في
+
+utils.js
 
 2. افتح المتصفح على:
 ```
-http://localhost:8080
+ انسخ رابط اربطو في utils.js مثل هيك
+
+const API_URL = 'https://curly-space-tribble-6jx7v4gq9qqcxw-3000.app.github.dev/api';
 ```
 
 ## 📖 الاستخدام
