@@ -59,8 +59,19 @@ const auth = {
     const email = document.getElementById('registerEmail').value;
     const password = document.getElementById('registerPassword').value;
 
+    // طباعة البيانات قبل الإرسال (بدون كلمة المرور الفعلية)
+    console.log('📝 محاولة التسجيل...');
+    console.log('📝 البيانات:', {
+      username: username,
+      email: email,
+      passwordLength: password.length
+    });
+
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
+      const apiUrl = `${API_URL}/auth/register`;
+      console.log('📝 URL الكامل للـ API:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -68,11 +79,20 @@ const auth = {
         body: JSON.stringify({ username, email, password })
       });
 
+      console.log('📝 Response Status:', response.status);
+      
       const data = await response.json();
+      console.log('📝 Response Data:', data);
 
       if (!response.ok) {
+        console.error('❌ فشل التسجيل:', data.error);
+        if (data.details) {
+          console.error('❌ تفاصيل الخطأ:', data.details);
+        }
         throw new Error(data.error || 'فشل التسجيل');
       }
+
+      console.log('✅ تم التسجيل بنجاح');
 
       // Save token and user data
       this.token = data.token;
@@ -83,8 +103,23 @@ const auth = {
       utils.showToast('تم التسجيل بنجاح!', 'success');
       this.showApp();
     } catch (error) {
-      console.error('Register error:', error);
-      utils.showToast(error.message, 'error');
+      console.error('❌ خطأ في التسجيل:', error);
+      
+      // رسالة خطأ محسّنة للمستخدم
+      let errorMessage = error.message;
+      
+      // إذا كان خطأ شبكة (Failed to fetch)
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        console.error('❌ خطأ في الاتصال بالسيرفر');
+        console.error('⚠️  تأكد من:');
+        console.error('   1. السيرفر يعمل على http://localhost:3000');
+        console.error('   2. API_URL في utils.js صحيح');
+        console.error('   3. لا توجد مشاكل في CORS');
+        
+        errorMessage = 'فشل الاتصال بالسيرفر. تأكد من أن السيرفر يعمل على http://localhost:3000';
+      }
+      
+      utils.showToast(errorMessage, 'error');
     }
   },
 
@@ -92,8 +127,18 @@ const auth = {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
+    // طباعة البيانات قبل الإرسال (بدون كلمة المرور الفعلية)
+    console.log('📝 محاولة تسجيل الدخول...');
+    console.log('📝 البيانات:', {
+      email: email,
+      hasPassword: !!password
+    });
+
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const apiUrl = `${API_URL}/auth/login`;
+      console.log('📝 URL الكامل للـ API:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -101,11 +146,20 @@ const auth = {
         body: JSON.stringify({ email, password })
       });
 
+      console.log('📝 Response Status:', response.status);
+      
       const data = await response.json();
+      console.log('📝 Response Data:', data);
 
       if (!response.ok) {
+        console.error('❌ فشل تسجيل الدخول:', data.error);
+        if (data.details) {
+          console.error('❌ تفاصيل الخطأ:', data.details);
+        }
         throw new Error(data.error || 'فشل تسجيل الدخول');
       }
+
+      console.log('✅ تم تسجيل الدخول بنجاح');
 
       // Save token and user data
       this.token = data.token;
@@ -116,8 +170,23 @@ const auth = {
       utils.showToast('مرحباً بعودتك!', 'success');
       this.showApp();
     } catch (error) {
-      console.error('Login error:', error);
-      utils.showToast(error.message, 'error');
+      console.error('❌ خطأ في تسجيل الدخول:', error);
+      
+      // رسالة خطأ محسّنة للمستخدم
+      let errorMessage = error.message;
+      
+      // إذا كان خطأ شبكة (Failed to fetch)
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        console.error('❌ خطأ في الاتصال بالسيرفر');
+        console.error('⚠️  تأكد من:');
+        console.error('   1. السيرفر يعمل على http://localhost:3000');
+        console.error('   2. API_URL في utils.js صحيح');
+        console.error('   3. لا توجد مشاكل في CORS');
+        
+        errorMessage = 'فشل الاتصال بالسيرفر. تأكد من أن السيرفر يعمل على http://localhost:3000';
+      }
+      
+      utils.showToast(errorMessage, 'error');
     }
   },
 

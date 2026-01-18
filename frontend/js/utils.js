@@ -1,5 +1,9 @@
 // Configuration
-const API_URL = 'https://laughing-palm-tree-5w7pvxqjx59fppr-3000.app.github.dev/';
+// ⚠️ تغيير API_URL حسب البيئة:
+// - محلي (Local): 'http://localhost:3000/api'
+// - Codespaces: 'https://YOUR-CODESPACE-URL.app.github.dev/api'
+// - إنتاج (Production): 'https://your-domain.com/api'
+const API_URL = 'http://localhost:3000/api';
 
 // Utility Functions
 const utils = {

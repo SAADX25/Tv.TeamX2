@@ -29,6 +29,11 @@ router.post('/', auth, async (req, res) => {
   try {
     const { content, channelId, attachments, replyTo } = req.body;
 
+    // التحقق من وجود channelId
+    if (!channelId) {
+      return res.status(400).json({ error: 'معرف القناة مطلوب' });
+    }
+
     if (!content && (!attachments || attachments.length === 0)) {
       return res.status(400).json({ error: 'الرسالة فارغة' });
     }
