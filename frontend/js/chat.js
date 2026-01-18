@@ -413,9 +413,29 @@ const chat = {
     const urls = msg.content.match(urlRegex);
     let linkPreviewsHtml = '<div class="link-previews-container"></div>';
 
+    const statusDot = `<span class="status-dot ${msg.author?.status || 'offline'}"></span>`;
+    
+    let replyHtml = '';
+    if (msg.replyTo) {
+      const replyAuthor = msg.replyTo.author?.username || 'User';
+      const replyText = msg.replyTo.content || '...';
+      replyHtml = `
+        <div class="message-reference" onclick="window.chat.scrollToMessage('${msg.replyTo._id || msg.replyTo.id}')">
+          <i class="fas fa-reply"></i>
+          <span class="ref-author">${replyAuthor}</span>
+          <span class="ref-text">${replyText}</span>
+        </div>
+      `;
+    }
+
+    let avatarSrc = msg.author?.avatar || 'assets/default-avatar.svg';
+    if (avatarSrc && !avatarSrc.startsWith('http') && !avatarSrc.startsWith('assets/')) {
+        avatarSrc = `/uploads/${avatarSrc}`;
+    }
+
     div.innerHTML = `
       <div class="avatar-container">
-        <img src="${msg.author?.avatar || 'assets/default-avatar.svg'}" class="message-avatar">
+        <img src="${avatarSrc}" class="message-avatar">
         ${statusDot}
       </div>
       <div class="message-content">

@@ -216,21 +216,65 @@ body {
 }
 
 /* App-wide Glassmorphism */
-.channels-sidebar, .members-sidebar {
-  background: rgba(15, 15, 23, 0.6) !important;
-  backdrop-filter: blur(10px);
+.channels-sidebar, .members-sidebar, .chat-area {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.channels-sidebar::before, .members-sidebar::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 15, 23, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: -1;
+}
+
+.chat-area::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 10, 15, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: -1;
+}
+
+.user-avatar, .message-avatar, .member-avatar, .link-preview-image, .message-attachment img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.control-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--brand-primary);
+  box-shadow: 0 0 10px rgba(88, 101, 242, 0.3);
+  transform: translateY(-2px);
+}
+
+.control-btn:active {
+  transform: translateY(0);
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 72px 240px 1fr 240px;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .chat-area {
-  background: rgba(10, 10, 15, 0.4) !important;
-  backdrop-filter: blur(5px);
+  flex: 1;
+  width: 100%;
 }
 
-.form-group input {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
 
 .form-group input:focus {
   background: rgba(88, 101, 242, 0.05);
@@ -770,11 +814,36 @@ body {
   margin-bottom: 2px;
 }
 
-.attachment-size {
-  display: block;
-  font-size: 12px;
-  color: var(--text-muted);
+.user-info:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  cursor: pointer;
 }
+
+.control-btn i {
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.control-btn:hover i {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 5px var(--brand-primary));
+}
+
+.message-attachment img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.chat-messages {
+  max-width: none !important;
+}
+
+.message-input-container {
+  max-width: none !important;
+}
+
 
 /* Typing Indicator */
 .typing-indicator {

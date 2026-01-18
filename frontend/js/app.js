@@ -14,6 +14,7 @@ const app = {
     this.setupUserControls();
     this.setupMembersToggle();
     this.loadServers();
+    this.updateUserBar();
   },
 
   setupChannels() {
@@ -206,7 +207,11 @@ const app = {
   updateMembersList() {
     const member = document.getElementById('currentUserMember');
     if (member && auth.user) {
-      member.querySelector('.member-avatar').src = auth.user.avatar || 'assets/default-avatar.svg';
+      let avatarSrc = auth.user.avatar || 'assets/default-avatar.svg';
+      if (avatarSrc && !avatarSrc.startsWith('http') && !avatarSrc.startsWith('assets/')) {
+          avatarSrc = `/uploads/${avatarSrc}`;
+      }
+      member.querySelector('.member-avatar').src = avatarSrc;
       const nameEl = member.querySelector('.member-name');
       nameEl.textContent = auth.user.username;
       
@@ -214,6 +219,31 @@ const app = {
       nameEl.className = 'member-name'; 
       if (auth.user.nameColor && auth.user.nameColor !== 'default') {
           nameEl.classList.add(`name-col-${auth.user.nameColor}`);
+      }
+    }
+  },
+
+  loadMembers() {
+    this.updateMembersList();
+  },
+
+  updateUserBar() {
+    const avatar = document.getElementById('userAvatar');
+    const username = document.getElementById('currentUsername');
+    if (auth.user) {
+      if (avatar) {
+        let avatarSrc = auth.user.avatar || 'assets/default-avatar.svg';
+        if (avatarSrc && !avatarSrc.startsWith('http') && !avatarSrc.startsWith('assets/')) {
+            avatarSrc = `/uploads/${avatarSrc}`;
+        }
+        avatar.src = avatarSrc;
+      }
+      if (username) {
+        username.textContent = auth.user.username;
+        username.className = 'username';
+        if (auth.user.nameColor && auth.user.nameColor !== 'default') {
+          username.classList.add(`name-col-${auth.user.nameColor}`);
+        }
       }
     }
   }
