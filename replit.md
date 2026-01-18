@@ -64,12 +64,19 @@ The application runs as a single Node.js server that serves both the API and sta
 - **Animated Usernames**: RGB effects (rainbow, gold, red glow, blue neon, matrix green)
 - **RTL Arabic Interface**: Full right-to-left layout support
 
+- **Clear Messages**: Local "Clear Screen" button to empty the chat view (eraser icon)
+
 ## API Endpoints
 ### Messages
 - `POST /api/messages/:id/reactions` - Toggle emoji reaction on message
 - `POST /api/messages/reply` - Reply to a message with quoted context
 
 ## Recent Changes
+- January 18, 2026: Enhanced User Experience
+  - Added "Clear Screen" local button (eraser icon) in the chat header
+  - Implemented circular avatar styling with high-quality rendering
+  - Enhanced Settings with real-time profile picture previews (URL & Upload)
+  - Fixed avatar path resolution and added robust error fallbacks
 - January 18, 2026: Production-Grade Upgrade
   - Redesigned Login/Register with Deep Space Theme (animated stars & gradient)
   - Applied app-wide Glassmorphism (blurred semi-transparent UI)
