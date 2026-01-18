@@ -3,7 +3,7 @@
 // - محلي (Local): 'http://localhost:3000/api'
 // - Codespaces: 'https://YOUR-CODESPACE-URL.app.github.dev/api'
 // - إنتاج (Production): 'https://your-domain.com/api'
-const API_URL = 'https://shiny-broccoli-4jgrwjpqwv63jjrg-3000.app.github.dev/api';
+const API_URL = 'https://curly-space-tribble-6jx7v4gq9qqcxw-3000.app.github.dev/api';
 
 
 // Utility Functions
