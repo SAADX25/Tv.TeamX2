@@ -70,16 +70,17 @@ The application runs as a single Node.js server that serves both the API and sta
 - `POST /api/messages/reply` - Reply to a message with quoted context
 
 ## Recent Changes
+- January 18, 2026: Production-Grade Upgrade
+  - Redesigned Login/Register with Deep Space Theme (animated stars & gradient)
+  - Applied app-wide Glassmorphism (blurred semi-transparent UI)
+  - Implemented Voice Notes using MediaRecorder API
+  - Added real File Upload for profile pictures in Settings
+  - Implemented rich Link Previews using Open Graph metadata
+  - Added @Mentions highlighting for users
+  - Added Admin Tool (Delete All Messages) for owners
+  - Enhanced Mobile Responsiveness with a Hamburger Menu
+  - Fixed User Presence updates and Double Messages bugs
 - January 18, 2026: Enhanced chat features
-  - Added typing indicators with real-time Socket.IO broadcasting
-  - Implemented Markdown parsing with Prism.js syntax highlighting
-  - Built message reactions system with emoji picker and toggle
-  - Added reply system with quoted context and navigation
-  - Implemented role badges (Owner, Admin, VIP) on user profiles
-  - Added online/offline status dots with real-time updates
-  - Fixed reaction toggle ObjectId vs string comparison bug
-  - Added autocomplete attributes to form inputs for accessibility
+  - Added typing indicators, Markdown, reactions, replies, and role badges
 - January 18, 2026: Initial Replit setup
-  - Configured server to run on port 5000 with 0.0.0.0 binding
-  - Updated API_URL to use dynamic origin for Replit compatibility
-  - Set up environment variables for JWT_SECRET and MONGODB_URI
+  - Configured server on port 5000 and established MongoDB connection
