@@ -1059,3 +1059,228 @@ body {
 .name-col-default {
   color: var(--text-primary);
 }
+
+/* Status Dots */
+.avatar-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-tertiary);
+}
+
+.status-dot.online {
+  background: var(--success);
+}
+
+.status-dot.offline {
+  background: #72767d;
+}
+
+.status-dot.away {
+  background: var(--warning);
+}
+
+.status-dot.busy {
+  background: var(--danger);
+}
+
+/* Role Badges */
+.role-badge {
+  margin-left: 4px;
+  font-size: 14px;
+}
+
+/* Code Blocks */
+.code-block {
+  background: #1e1e2e;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  direction: ltr;
+  text-align: left;
+}
+
+.code-block code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.inline-code {
+  background: rgba(88, 101, 242, 0.2);
+  color: #ff79c6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.9em;
+  direction: ltr;
+}
+
+/* Blockquotes */
+.message-text blockquote {
+  border-right: 4px solid var(--brand-primary);
+  padding: 8px 16px;
+  margin: 8px 0;
+  background: rgba(88, 101, 242, 0.1);
+  border-radius: 0 4px 4px 0;
+  color: var(--text-secondary);
+}
+
+/* Message Reactions */
+.message-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reaction:hover {
+  background: var(--bg-active);
+  border-color: var(--brand-primary);
+}
+
+.reaction.active {
+  background: rgba(88, 101, 242, 0.2);
+  border-color: var(--brand-primary);
+}
+
+.reaction-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Add Reaction Button */
+.add-reaction-btn {
+  background: none;
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 4px 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.add-reaction-btn:hover {
+  border-color: var(--brand-primary);
+  color: var(--text-primary);
+}
+
+/* Reply Preview */
+.reply-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: var(--bg-hover);
+  border-radius: 8px;
+  border-right: 3px solid var(--brand-primary);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.reply-preview .reply-author {
+  color: var(--brand-primary);
+  font-weight: 600;
+}
+
+.reply-preview .reply-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.reply-preview .close-reply {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Message Reference (for replied messages) */
+.message-reference {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.message-reference:hover {
+  color: var(--text-secondary);
+}
+
+.message-reference i {
+  color: var(--text-muted);
+}
+
+.message-reference .ref-author {
+  color: var(--brand-primary);
+  font-weight: 600;
+}
+
+/* Video in messages */
+.message-attachment video {
+  max-width: 400px;
+  max-height: 300px;
+  border-radius: 8px;
+}
+
+/* Message Highlight */
+.message.highlight {
+  animation: messageHighlight 2s ease;
+}
+
+@keyframes messageHighlight {
+  0%, 100% { background: transparent; }
+  25%, 75% { background: rgba(88, 101, 242, 0.2); }
+}
+
+/* Reaction Picker */
+.reaction-picker {
+  animation: fadeIn 0.2s ease;
+}
+
+.reaction-option {
+  cursor: pointer;
+  font-size: 20px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.reaction-option:hover {
+  background: var(--bg-hover);
+  transform: scale(1.2);
+}

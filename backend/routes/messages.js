@@ -16,8 +16,9 @@ router.get('/channel/:channelId', auth, async (req, res) => {
     const messages = await Message.find({ channel: channelId })
       .sort({ createdAt: -1 })
       .limit(50)
-      // ✅ التعديل الضروري هنا: أضفنا nameColor
-      .populate('author', 'username avatar status nameColor');
+      .populate('author', 'username avatar status nameColor role')
+      .populate('replyTo', 'content author')
+      .populate({ path: 'replyTo', populate: { path: 'author', select: 'username' } });
 
     res.json({ messages: messages.reverse() });
   } catch (error) {
@@ -49,8 +50,7 @@ router.post('/', auth, async (req, res) => {
 
     await message.save();
     
-    // ✅ التعديل الضروري هنا أيضاً: أضفنا nameColor ليظهر اللون فوراً
-    await message.populate('author', 'username avatar status nameColor');
+    await message.populate('author', 'username avatar status nameColor role');
 
     // إرسال عبر السوكت
     const io = req.app.get('io');
@@ -64,6 +64,90 @@ router.post('/', auth, async (req, res) => {
   } catch (error) {
     console.error('Send message error:', error);
     res.status(500).json({ error: 'فشل إرسال الرسالة' });
+  }
+});
+
+// إضافة/إزالة reaction
+router.post('/:id/reactions', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { emoji } = req.body;
+    const userId = req.user.userId;
+
+    if (!emoji || typeof emoji !== 'string') {
+      return res.status(400).json({ error: 'الإيموجي مطلوب' });
+    }
+
+    const message = await Message.findById(id);
+    if (!message) return res.status(404).json({ error: 'الرسالة غير موجودة' });
+
+    const existingReaction = message.reactions.find(r => r.emoji === emoji);
+    
+    if (existingReaction) {
+      const userIndex = existingReaction.users.findIndex(u => u.toString() === userId);
+      if (userIndex > -1) {
+        existingReaction.users.splice(userIndex, 1);
+        if (existingReaction.users.length === 0) {
+          message.reactions = message.reactions.filter(r => r.emoji !== emoji);
+        }
+      } else {
+        existingReaction.users.push(userId);
+      }
+    } else {
+      message.reactions.push({ emoji, users: [userId] });
+    }
+
+    await message.save();
+    
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`channel-${message.channel}`).emit('message-reaction', {
+        messageId: id,
+        reactions: message.reactions
+      });
+    }
+
+    res.json({ reactions: message.reactions });
+  } catch (error) {
+    console.error('Reaction error:', error);
+    res.status(500).json({ error: 'خطأ في التفاعل' });
+  }
+});
+
+// الرد على رسالة
+router.post('/reply', auth, async (req, res) => {
+  try {
+    const { content, channelId, replyToId, attachments } = req.body;
+    const userId = req.user.userId;
+
+    if (!channelId || !replyToId) {
+      return res.status(400).json({ error: 'بيانات ناقصة' });
+    }
+
+    const message = new Message({
+      content: content || '',
+      author: userId,
+      channel: channelId,
+      replyTo: replyToId,
+      attachments: attachments || []
+    });
+
+    await message.save();
+    await message.populate('author', 'username avatar status nameColor role');
+    await message.populate('replyTo', 'content author');
+    await message.populate({ path: 'replyTo', populate: { path: 'author', select: 'username' } });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`channel-${channelId}`).emit('new-message', {
+        message: message.toObject()
+      });
+    }
+
+    res.status(201).json({ message });
+  } catch (error) {
+    console.error('Reply error:', error);
+    res.status(500).json({ error: 'خطأ في الرد' });
   }
 });
 
