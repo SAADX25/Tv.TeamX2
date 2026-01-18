@@ -7,6 +7,9 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const xss = require('xss-clean');
 
 // ✅ فحص المتغيرات البيئية الضرورية
 console.log('📝 فحص المتغيرات البيئية...');
@@ -24,7 +27,7 @@ if (!process.env.MONGODB_URI) {
 }
 
 console.log('✅ JWT_SECRET موجود');
-console.log('✅ MONGODB_URI موجود:', process.env.MONGODB_URI);
+console.log('✅ MONGODB_URI موجود');
 console.log('✅ جميع المتغيرات البيئية متوفرة');
 
 // استيراد المسارات
@@ -49,10 +52,34 @@ const io = socketIO(server, {
 // يجعل السوكت متاحاً لملفات الـ API لكي ترسل تنبيهات عند وصول رسالة HTTP
 app.set('io', io);
 
+// 🛡️ Security Middleware
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
+
+// 🚫 Rate Limiting - الحماية من هجمات brute-force
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'كثرة المحاولات، حاول مرة أخرى بعد 15 دقيقة' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const generalLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 100,
+  message: { error: 'طلبات كثيرة جداً، انتظر دقيقة' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(xss());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // File upload configuration
@@ -81,11 +108,11 @@ const upload = multer({
   }
 });
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/messages', messagesRoutes);
-app.use('/api/channels', channelsRoutes);
-app.use('/api/servers', serversRoutes); // ✅ تفعيل مسار السيرفرات
+// Routes with Rate Limiting
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/messages', generalLimiter, messagesRoutes);
+app.use('/api/channels', generalLimiter, channelsRoutes);
+app.use('/api/servers', generalLimiter, serversRoutes);
 
 // File upload endpoint
 app.post('/api/upload', upload.single('file'), (req, res) => {
