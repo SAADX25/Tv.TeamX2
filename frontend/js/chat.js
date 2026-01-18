@@ -15,9 +15,6 @@ const chat = {
     this.setupChannelManagement();
     this.loadChannels();
     
-    // Default channel
-    this.loadChannel('696c89cd48e7684bf3ddb21f');
-
     const clearBtn = document.getElementById('clearMessagesBtn');
     if (clearBtn) {
         clearBtn.onclick = () => this.clearMessages();
@@ -261,11 +258,30 @@ const chat = {
 
   async loadChannels() {
     try {
-      const serverId = '65a8e3f9e4b0a1b2c3d4e5f6'; 
+      // ✅ جلب أول سيرفر متاح للمستخدم بدلاً من المعرف الثابت
+      let serverId = localStorage.getItem('currentServerId');
+      
+      if (!serverId) {
+        const serverRes = await fetch(`${API_URL}/servers`, { headers: auth.getAuthHeader() });
+        const servers = await serverRes.json();
+        if (servers && servers.length > 0) {
+          serverId = servers[0]._id || servers[0].id;
+          localStorage.setItem('currentServerId', serverId);
+        }
+      }
+
+      if (!serverId) return;
+
       const res = await fetch(`${API_URL}/channels/server/${serverId}`, { headers: auth.getAuthHeader() });
       const data = await res.json();
       const channels = data.channels || [];
       this.renderChannels(channels);
+      
+      // Load first text channel by default if none selected
+      if (!this.currentChannel && channels.length > 0) {
+        const firstText = channels.find(c => c.type === 'text');
+        if (firstText) this.loadChannel(firstText._id);
+      }
     } catch (error) {
       console.error('Load channels error:', error);
     }
@@ -342,7 +358,7 @@ const chat = {
       const id = document.getElementById('channelIdInput').value;
       const name = document.getElementById('channelNameInput').value;
       const type = document.getElementById('channelTypeInput').value;
-      const serverId = '65a8e3f9e4b0a1b2c3d4e5f6';
+      const serverId = localStorage.getItem('currentServerId');
 
       try {
         const method = id ? 'PUT' : 'POST';
@@ -353,6 +369,8 @@ const chat = {
           body: JSON.stringify({ name, type, serverId })
         });
         modal.classList.remove('active');
+        // ✅ تحديث القائمة فوراً بعد الإنشاء أو التعديل
+        this.loadChannels();
       } catch (error) {
         utils.showToast('خطأ في العملية', 'error');
       }
@@ -506,6 +524,16 @@ const chat = {
     this.currentChannel = channelId;
     if (window.socketModule) socketModule.joinChannel(channelId);
     
+    // Update channel name in header
+    const channelEl = document.querySelector(`.channel[data-channel-id="${channelId}"]`);
+    if (channelEl) {
+      const headerTitle = document.querySelector('.chat-header h2') || document.querySelector('.chat-header span');
+      if (headerTitle) {
+        const name = channelEl.querySelector('span')?.textContent || 'قناة';
+        headerTitle.innerHTML = `<i class="fas fa-hashtag"></i> ${name}`;
+      }
+    }
+
     try {
         const res = await fetch(`${API_URL}/messages/channel/${channelId}`, { headers: auth.getAuthHeader() });
         const data = await res.json();

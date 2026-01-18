@@ -199,6 +199,13 @@ const app = {
       const response = await fetch(`${API_URL}/servers`, { headers: auth.getAuthHeader() });
       if (!response.ok) throw new Error('فشل التحميل');
       const servers = await response.json();
+      
+      if (servers && servers.length > 0 && !localStorage.getItem('currentServerId')) {
+        localStorage.setItem('currentServerId', servers[0]._id || servers[0].id);
+        // Reload channels if we just set the server
+        if (window.chat) window.chat.loadChannels();
+      }
+
       this.renderServers(servers);
       this.updateMembersList();
     } catch (error) {
