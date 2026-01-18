@@ -264,9 +264,11 @@ const chat = {
       if (!serverId) {
         const serverRes = await fetch(`${API_URL}/servers`, { headers: auth.getAuthHeader() });
         const servers = await serverRes.json();
+        console.log('📡 السيرفرات المتاحة:', servers);
         if (servers && servers.length > 0) {
           serverId = servers[0]._id || servers[0].id;
           localStorage.setItem('currentServerId', serverId);
+          console.log('✅ تم اختيار السيرفر:', serverId);
         }
       }
 
