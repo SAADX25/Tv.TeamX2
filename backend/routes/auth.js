@@ -156,7 +156,7 @@ router.post('/register', async (req, res) => {
     
     // MongoServerError - خطأ duplicate key (11000)
     else if (error.name === 'MongoServerError' || error.name === 'MongoError') {
-      if (error.code === 11000 && error.keyValue) {
+      if (error.code === 11000 && error.keyValue && Object.keys(error.keyValue).length > 0) {
         console.error('❌ خطأ مفتاح مكرر (11000):', error.keyValue);
         const duplicateField = Object.keys(error.keyValue)[0];
         errorResponse = {
