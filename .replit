@@ -1,0 +1,12 @@
+modules = ["nodejs-20", "web"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+JWT_SECRET = "sYNk+Sqv04nm8dZRchiPBc37lSK9ShBPTztfTt6sRLg="
+PORT = "5000"
