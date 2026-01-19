@@ -234,10 +234,19 @@ const fileUpload = {
       });
 
       xhr.addEventListener('error', () => {
-        throw new Error('فشل رفع الملف');
+        utils.showToast('فشل رفع الملف - تحقق من اتصال الإنترنت', 'error');
+        uploadBtn.disabled = false;
+        uploadProgress.style.display = 'none';
+      });
+
+      xhr.addEventListener('timeout', () => {
+        utils.showToast('انتهت مهلة الرفع - الملف كبير جداً أو الاتصال بطيء', 'error');
+        uploadBtn.disabled = false;
+        uploadProgress.style.display = 'none';
       });
 
       xhr.open('POST', `${API_URL.replace('/api', '')}/api/upload`);
+      xhr.timeout = 600000; // 10 minutes timeout for large files
       xhr.setRequestHeader('Authorization', `Bearer ${auth.token}`);
       xhr.send(formData);
 

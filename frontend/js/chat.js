@@ -709,7 +709,7 @@ const chat = {
         msg.attachments.forEach(file => {
             const url = file.url || file;
             if (/\.(jpg|jpeg|png|gif)$/i.test(url)) {
-                attachmentsHtml += `<div class="message-attachment"><img src="${url}" onload="window.chat.scrollToBottom()" onclick="window.open('${url}')"></div>`;
+                attachmentsHtml += `<div class="message-attachment"><img src="${url}" onload="window.chat.scrollToBottom()" onclick="window.chat.openLightbox('${url}')"></div>`;
             } else if (/\.(mp4|webm|mov)$/i.test(url)) {
                 attachmentsHtml += `<div class="message-attachment"><video src="${url}" controls onloadeddata="window.chat.scrollToBottom()"></video></div>`;
             } else {
@@ -939,6 +939,32 @@ const chat = {
         console.error('Clear messages error:', error);
         utils.showToast('حدث خطأ أثناء محاولة حذف الرسائل', 'error');
       }
+    }
+  },
+
+  openLightbox(imageUrl) {
+    const lightbox = document.getElementById('imageLightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    if (lightbox && lightboxImage) {
+      lightboxImage.src = imageUrl;
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', this.handleLightboxKeydown);
+    }
+  },
+
+  closeLightbox() {
+    const lightbox = document.getElementById('imageLightbox');
+    if (lightbox) {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', this.handleLightboxKeydown);
+    }
+  },
+
+  handleLightboxKeydown(e) {
+    if (e.key === 'Escape') {
+      window.chat.closeLightbox();
     }
   }
 };

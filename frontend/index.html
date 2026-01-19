@@ -393,6 +393,16 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <div class="lightbox-modal" id="imageLightbox">
+    <div class="lightbox-overlay" onclick="window.chat.closeLightbox()"></div>
+    <div class="lightbox-content">
+      <button class="lightbox-close" onclick="window.chat.closeLightbox()">
+        <i class="fas fa-times"></i>
+      </button>
+      <img id="lightboxImage" src="" alt="Image Preview">
+    </div>
+  </div>
+
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
@@ -401,11 +411,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-  <script src="js/utils.js?v=1.5"></script>
-  <script src="js/auth.js?v=1.5"></script>
-  <script src="js/socket.js?v=1.5"></script>
-  <script src="js/fileUpload.js?v=1.5"></script>
-  <script src="js/chat.js?v=1.5"></script>
-  <script src="js/app.js?v=1.5"></script>
+  <script src="js/utils.js?v=1.6"></script>
+  <script src="js/auth.js?v=1.6"></script>
+  <script src="js/socket.js?v=1.6"></script>
+  <script src="js/fileUpload.js?v=1.6"></script>
+  <script src="js/chat.js?v=1.6"></script>
+  <script src="js/app.js?v=1.6"></script>
 </body>
 </html>
