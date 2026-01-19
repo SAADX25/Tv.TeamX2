@@ -81,6 +81,12 @@ The application runs as a single Node.js server that serves both the API and sta
 - **Password Hashing**: bcrypt with salt
 
 ## Recent Changes
+- January 19, 2026: Upload & Image Viewer Improvements
+  - Added 10-minute timeout for large file uploads (up to 400MB)
+  - Added better error handling with user-friendly toast messages
+  - Added in-app Lightbox for viewing images (no more new tabs)
+  - ESC key closes the image lightbox
+  - Images now have hover effect and cursor pointer
 - January 18, 2026: Security Improvements
   - Added Helmet for HTTP security headers
   - Added Rate Limiting to prevent brute-force attacks
