@@ -77,7 +77,7 @@ The application runs as a single Node.js server that serves both the API and sta
 - **Rate Limiting**: 20 requests/15min for auth, 100 requests/min for API
 - **XSS Protection**: Automatic input sanitization
 - **Hidden Credentials**: MongoDB URI and secrets not logged
-- **Request Limits**: 10MB max body size
+- **Request Limits**: 400MB max body/file size
 - **Password Hashing**: bcrypt with salt
 
 ## Recent Changes

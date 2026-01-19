@@ -40,6 +40,7 @@ const User = require('./models/User');
 const Message = require('./models/Message');
 
 const app = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 const io = socketIO(server, {
   cors: {
