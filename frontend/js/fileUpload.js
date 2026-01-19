@@ -1,7 +1,7 @@
 // File Upload Module
 const fileUpload = {
   selectedFile: null,
-  maxFileSize: 10 * 1024 * 1024, // 10MB
+  maxFileSize: 400 * 1024 * 1024, // 400MB
 
   init() {
     this.setupAttachButton();
@@ -143,7 +143,7 @@ const fileUpload = {
   handleFileSelect(file) {
     // Validate file size
     if (file.size > this.maxFileSize) {
-      utils.showToast('حجم الملف كبير جداً. الحد الأقصى 10 ميجابايت', 'error');
+      utils.showToast('حجم الملف كبير جداً. الحد الأقصى 400 ميجابايت', 'error');
       return;
     }
 
