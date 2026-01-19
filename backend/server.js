@@ -77,8 +77,8 @@ const generalLimiter = rateLimit({
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '400mb' }));
+app.use(express.urlencoded({ extended: true, limit: '400mb' }));
 app.use(xss());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -95,7 +95,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 400 * 1024 * 1024 }, // 400MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp|svg|pdf|doc|docx|txt|zip|rar/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
