@@ -256,6 +256,7 @@ const chat = {
     }
   },
 
+  // ✅ الدالة المعدلة التي تحل المشكلة
   async loadChannels() {
     try {
       if (!auth.token) {
@@ -263,21 +264,20 @@ const chat = {
         return;
       }
 
-      // ✅ جلب أول سيرفر متاح للمستخدم بدلاً من المعرف الثابت
+      // محاولة جلب السيرفر المخزن
       let serverId = localStorage.getItem('currentServerId');
       
+      // إذا لم يكن هناك سيرفر محفوظ، نجلبه من الـ API
       if (!serverId || serverId === 'null' || serverId === 'undefined') {
         console.log('🔄 محاولة جلب السيرفرات...');
         const serverRes = await fetch(`${API_URL}/servers`, { headers: auth.getAuthHeader() });
         const servers = await serverRes.json();
-        console.log('📡 السيرفرات المتاحة:', servers);
         
         if (Array.isArray(servers) && servers.length > 0) {
           serverId = servers[0]._id || servers[0].id;
           localStorage.setItem('currentServerId', serverId);
           console.log('✅ تم اختيار السيرفر:', serverId);
-          // إعادة تحميل القنوات فوراً بعد تعيين السيرفر
-          return this.loadChannels();
+          return this.loadChannels(); // إعادة المحاولة فوراً
         } else {
           console.warn('⚠️ لم يتم العثور على أي سيرفر للمستخدم');
           return;
@@ -286,12 +286,19 @@ const chat = {
 
       console.log(`📡 Loading channels for server: ${serverId}`);
       const res = await fetch(`${API_URL}/channels/server/${serverId}`, { headers: auth.getAuthHeader() });
+      
+      // 🔥 الحل هنا: إذا كان السيرفر غير موجود (404)، نحذف المعرف القديم ونعيد المحاولة
+      if (res.status === 404) {
+          console.warn('❌ السيرفر المحفوظ غير موجود (404). جاري التحديث...');
+          localStorage.removeItem('currentServerId');
+          return this.loadChannels();
+      }
+
       const data = await res.json();
       const channels = data.channels || [];
       console.log('✅ Channels loaded:', channels.length);
       this.renderChannels(channels);
       
-      // Load first text channel by default if none selected
       if (!this.currentChannel && channels.length > 0) {
         const firstText = channels.find(c => c.type === 'text');
         if (firstText) this.loadChannel(firstText._id);
