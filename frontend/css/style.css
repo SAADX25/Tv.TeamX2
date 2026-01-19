@@ -264,11 +264,15 @@ body {
 
 .app {
   display: grid;
-  /* التعديل هنا: بدلاً من 240px ثابتة، نجعلها بحد أقصى 240px لكن تقبل الصغر */
-  grid-template-columns: minmax(200px, 240px) 1fr minmax(200px, 240px);
+  grid-template-columns: 240px 1fr 240px;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+}
+
+.chat-area {
+  flex: 1;
+  width: 100%;
 }
 
 
@@ -325,7 +329,7 @@ body {
   display: none !important;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .mobile-only {
     display: block !important;
   }
@@ -377,10 +381,11 @@ body {
   color: var(--text-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2; /* أضف هذا السطر هنا */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .app {
     grid-template-columns: 1fr;
   }
